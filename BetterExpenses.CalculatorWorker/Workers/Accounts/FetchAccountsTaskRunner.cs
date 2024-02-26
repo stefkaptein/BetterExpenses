@@ -47,7 +47,7 @@ public class FetchAccountsTaskRunner(
         var fetchExpensesTask = new FetchExpensesTask
         {
             UserId = task.UserId,
-            FetchTill = DateTime.Today.Subtract(userOptions.FetchPaymentsFrom)
+            FetchTill = DateTime.Today.Subtract(userOptions.FetchPaymentsFrom).ToUniversalTime()
         };
         
         await Task.WhenAll(

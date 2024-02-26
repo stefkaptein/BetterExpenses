@@ -123,9 +123,6 @@ namespace BetterExpenses.Common.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<Guid>("UserOptionsBetterExpensesUserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -134,8 +131,6 @@ namespace BetterExpenses.Common.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("UserOptionsBetterExpensesUserId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -167,14 +162,13 @@ namespace BetterExpenses.Common.Migrations
 
             modelBuilder.Entity("BetterExpenses.Common.Models.User.UserOptions", b =>
                 {
-                    b.Property<Guid>("BetterExpensesUserId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<TimeSpan>("FetchPaymentsFrom")
                         .HasColumnType("interval");
 
-                    b.HasKey("BetterExpensesUserId");
+                    b.HasKey("Id");
 
                     b.ToTable("UserOptions");
                 });
@@ -309,17 +303,6 @@ namespace BetterExpenses.Common.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BetterExpenses.Common.Models.User.BetterExpensesUser", b =>
-                {
-                    b.HasOne("BetterExpenses.Common.Models.User.UserOptions", "UserOptions")
-                        .WithMany()
-                        .HasForeignKey("UserOptionsBetterExpensesUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UserOptions");
-                });
-
             modelBuilder.Entity("BetterExpenses.Common.Models.User.UserMonetaryAccount", b =>
                 {
                     b.HasOne("BetterExpenses.Common.Models.User.BetterExpensesUser", null)
@@ -327,6 +310,17 @@ namespace BetterExpenses.Common.Migrations
                         .HasForeignKey("BetterExpensesUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BetterExpenses.Common.Models.User.UserOptions", b =>
+                {
+                    b.HasOne("BetterExpenses.Common.Models.User.BetterExpensesUser", "User")
+                        .WithOne("UserOptions")
+                        .HasForeignKey("BetterExpenses.Common.Models.User.UserOptions", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -383,6 +377,9 @@ namespace BetterExpenses.Common.Migrations
             modelBuilder.Entity("BetterExpenses.Common.Models.User.BetterExpensesUser", b =>
                 {
                     b.Navigation("Accounts");
+
+                    b.Navigation("UserOptions")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

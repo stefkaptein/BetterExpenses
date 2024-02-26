@@ -6,7 +6,7 @@ public class UserOptions
 {
     public static readonly TimeSpan DefaultFetchPaymentsFrom = TimeSpan.FromDays(90);
     
-    [Key]
-    public Guid BetterExpensesUserId { get; set; }
+    public Guid Id { get; set; }
+    public BetterExpensesUser User { get; set; }
     public TimeSpan FetchPaymentsFrom { get; set; } = DefaultFetchPaymentsFrom;
 }

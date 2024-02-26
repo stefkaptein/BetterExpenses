@@ -5,6 +5,7 @@ using BetterExpenses.Common.Services.Bunq;
 using BetterExpenses.Common.Services.Expenses;
 using BetterExpenses.Common.Services.MonetaryAccounts;
 using BetterExpenses.Common.Services.Tasks;
+using Bunq.Sdk.Model.Generated.Endpoint;
 
 namespace BetterExpenses.CalculatorWorker.Workers.Expenses;
 
@@ -46,7 +47,7 @@ public class FetchExpensesTaskRunner(
                 }
             );
         }
-
+        
         await _expensesMongoService.InsertMany(userAccountExpenseLists);
         await _calculatorTaskService.DeleteTask<FetchExpensesTask>(task.Id);
         return true;

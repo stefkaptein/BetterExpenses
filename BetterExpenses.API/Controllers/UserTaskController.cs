@@ -46,7 +46,7 @@ public class UserTaskController(
         var task = new FetchExpensesTask
         {
             UserId = user.Id,
-            FetchTill = DateTime.Today.Subtract(user.UserOptions.FetchPaymentsFrom)
+            FetchTill = DateTime.Today.Subtract(user.UserOptions.FetchPaymentsFrom).ToUniversalTime()
         };
         
         await _calculatorTaskService.AddTask(task);

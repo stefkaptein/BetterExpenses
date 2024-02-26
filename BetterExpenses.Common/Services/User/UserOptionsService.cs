@@ -21,13 +21,13 @@ public class UserOptionsService(SqlDbContext dbContext, IMapper mapper) : IUserO
     {
         return await _userOptionsSet
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.BetterExpensesUserId == userId);
+            .FirstOrDefaultAsync(x => x.Id == userId);
     }
 
     public async Task UpdateUserOptions(Guid userId, UserOptions optionsUpdates)
     {
         var optionsFromDb = await _userOptionsSet
-            .FirstOrDefaultAsync(x => x.BetterExpensesUserId == userId);
+            .FirstOrDefaultAsync(x => x.Id == userId);
         if (optionsFromDb == null)
         {
             throw new IdNotFoundInDatabase(userId.ToString());

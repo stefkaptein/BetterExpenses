@@ -41,5 +41,10 @@ public class SqlDbContext : IdentityDbContext<BetterExpensesUser, IdentityRole<G
                 entityType.SetTableName(tableName[6..]);
             }
         }
+        
+        modelBuilder.Entity<BetterExpensesUser>()
+            .HasOne(e => e.UserOptions)
+            .WithOne(e => e.User)
+            .HasForeignKey<UserOptions>();
     }
 }
