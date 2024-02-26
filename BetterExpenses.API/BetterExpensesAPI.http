@@ -1,0 +1,6 @@
+@BetterExpensesAPI_HostAddress = http://localhost:5100
+
+GET {{BetterExpensesAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
