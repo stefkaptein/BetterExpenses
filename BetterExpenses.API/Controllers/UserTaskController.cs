@@ -7,11 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BetterExpenses.API.Controllers;
 
-[ApiController, Authorize]
-[Route("[controller]/[action]")]
 public class UserTaskController(
     ICalculatorTaskService calculatorTaskService,
-    UserManager<BetterExpensesUser> userManager) : ControllerBase
+    UserManager<BetterExpensesUser> userManager) : AuthorizedApiControllerBase
 {
     private readonly ICalculatorTaskService _calculatorTaskService = calculatorTaskService;
 

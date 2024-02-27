@@ -5,10 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BetterExpenses.API.Controllers;
 
-[ApiController, Authorize]
-[Route("[controller]/[action]")]
 public class UserController(IMonetaryAccountService monetaryAccountService, IUserOptionsService userOptionsService)
-    : ControllerBase
+    : AuthorizedApiControllerBase
 {
     private readonly IMonetaryAccountService _monetaryAccountService = monetaryAccountService;
     private readonly IUserOptionsService _userOptionsService = userOptionsService;

@@ -11,15 +11,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BetterExpenses.API.Controllers;
 
-[ApiController, Authorize]
-[Route("[controller]/[action]")]
 public class AuthController(
     IBunqAuthService bunqAuthService,
     IApiContextService apiContextService,
     ICalculatorTaskService calculatorTaskService,
     UserManager<BetterExpensesUser> userManager,
     IJwtTokenService tokenService)
-    : ControllerBase
+    : AuthorizedApiControllerBase
 {
     private readonly IApiContextService _apiContextService = apiContextService;
     private readonly ICalculatorTaskService _calculatorTaskService = calculatorTaskService;

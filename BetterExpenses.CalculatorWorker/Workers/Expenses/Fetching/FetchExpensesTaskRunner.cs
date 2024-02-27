@@ -1,13 +1,11 @@
 ﻿using BetterExpenses.Common.Models.Expenses;
 using BetterExpenses.Common.Models.Tasks;
-using BetterExpenses.Common.Models.User;
 using BetterExpenses.Common.Services.Bunq;
 using BetterExpenses.Common.Services.Expenses;
 using BetterExpenses.Common.Services.MonetaryAccounts;
 using BetterExpenses.Common.Services.Tasks;
-using Bunq.Sdk.Model.Generated.Endpoint;
 
-namespace BetterExpenses.CalculatorWorker.Workers.Expenses;
+namespace BetterExpenses.CalculatorWorker.Workers.Expenses.Fetching;
 
 public interface IFetchExpensesTaskRunner
 {
