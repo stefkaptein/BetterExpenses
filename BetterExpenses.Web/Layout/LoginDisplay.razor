@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        Hello, @context.User.Identity?.Name!
+        <button class="nav-link btn btn-link" @onclick="BeginLogOut">Log out</button>
+    </Authorized>
+    <NotAuthorized>
+        <a href="authentication/login" @onclick="BeginLogIn">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code{
+
+    public void BeginLogOut()
+    {
+        Navigation.NavigateToLogout("authentication/logout");
+    }
+    
+    public void BeginLogIn()
+    {
+        InteractiveRequestOptions requestOptions =
+            new()
+            {
+                Interaction = InteractionType.SignIn,
+                ReturnUrl = Navigation.Uri,
+            };
+
+        requestOptions.TryAddAdditionalParameter("prompt", "login");
+        requestOptions.TryAddAdditionalParameter("loginHint", "peter@contoso.com");
+
+        Navigation.NavigateToLogin("authentication/login", requestOptions);
+    }
+}

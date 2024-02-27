@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterExpenses.Common", "Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterExpenses.CalculatorWorker", "BetterExpenses.CalculatorWorker\BetterExpenses.CalculatorWorker.csproj", "{DFEA1D06-25F5-43A3-ACB8-DBFF275FF211}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterExpenses.Web", "BetterExpenses.Web\BetterExpenses.Web.csproj", "{EC02A89A-9764-470B-8A1D-FD44DDB29EA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{DFEA1D06-25F5-43A3-ACB8-DBFF275FF211}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFEA1D06-25F5-43A3-ACB8-DBFF275FF211}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFEA1D06-25F5-43A3-ACB8-DBFF275FF211}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC02A89A-9764-470B-8A1D-FD44DDB29EA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC02A89A-9764-470B-8A1D-FD44DDB29EA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC02A89A-9764-470B-8A1D-FD44DDB29EA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC02A89A-9764-470B-8A1D-FD44DDB29EA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
