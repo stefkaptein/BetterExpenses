@@ -10,38 +10,6 @@ namespace BetterExpenses.API.Services;
 
 public static class ConfigureAuthenticationExtensions
 {
-    public static IServiceCollection ConfigureOpenIdServer(this IServiceCollection services)
-    {
-        services.AddOpenIddict()
-            .AddCore(
-                options =>
-                {
-                    //register stores 
-                    options.UseEntityFrameworkCore()
-                        .UseDbContext<SqlDbContext>();
-                }
-            )
-            .AddServer(
-                options =>
-                {
-                    // Enable the token endpoint.
-                    options.SetTokenEndpointUris("connect/token");
-
-                    // Enable the client credentials flow.
-                    options.AllowClientCredentialsFlow();
-
-                    // Register the signing and encryption credentials.
-                    options.AddDevelopmentEncryptionCertificate()
-                        .AddDevelopmentSigningCertificate();
-
-                    // Register the ASP.NET Core host and configure the ASP.NET Core options.
-                    options.UseAspNetCore()
-                        .EnableTokenEndpointPassthrough();
-                }
-            );
-        return services;
-    }
-    
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services,
         ConfigurationManager configuration)
     {
