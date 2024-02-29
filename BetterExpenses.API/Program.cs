@@ -1,6 +1,7 @@
 using BetterExpenses.API.Services;
 using BetterExpenses.Common.Database;
 using BetterExpenses.Common.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,8 +60,8 @@ builder.Services.BindCommonConfiguration(builder.Configuration);
 
 builder.Services.ConfigureAuthentication(builder.Configuration);
 
-builder.Services.ConfigurePostgres(builder.Configuration);
 builder.Services.ConfigureMongo(builder.Configuration);
+builder.Services.ConfigurePostgres(builder.Configuration);
 
 builder.Services.ConfigureServices();
 builder.Services.ConfigureCommonServices();

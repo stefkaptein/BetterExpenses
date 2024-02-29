@@ -4,35 +4,14 @@
 <AuthorizeView>
     <Authorized>
         Hello, @context.User.Identity?.Name!
-        <a class="nav-link btn btn-link" href="auth/logout">Log out</a>
-        <a class="nav-link btn btn-link" href="auth/userSettings">User settings</a>
+        <a class="nav-link btn btn-link" href="/auth/logout">Log out</a>
+        <a class="nav-link btn btn-link" href="/auth/userSettings">User settings</a>
     </Authorized>
     <NotAuthorized>
-        <a class="nav-link btn btn-link" href="auth/login">Log in</a>
-        <a class="nav-link btn btn-link" href="auth/register">Register</a>
+        <a class="nav-link btn btn-link" href="/auth/login">Log in</a>
+        <a class="nav-link btn btn-link" href="/auth/register">Register</a>
     </NotAuthorized>
 </AuthorizeView>
 
 @code{
-
-    private void BeginLogOut()
-    {
-        Navigation.NavigateToLogout("auth/logout");
-    }
-
-    private void BeginLogIn()
-    {
-        Navigation.NavigateToLogin("auth/login");
-    }
-
-    private void BeginRegistration()
-    {
-        Navigation.NavigateTo("auth/register");
-    }
-
-    private void ToUserSettings()
-    {
-        Navigation.NavigateToLogout("auth/userSettings");
-    }
-
 }

@@ -1,11 +1,20 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @code {
-
-    protected override void OnInitialized()
+    
+    protected override async Task OnInitializedAsync()
     {
-        Navigation.NavigateToLogin("auth/login");
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateToLogin("auth/login");
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
     }
 
 }
