@@ -1,10 +1,8 @@
-﻿using System.Text;
-using BetterExpenses.API.Services.Auth;
+﻿using BetterExpenses.API.Services.Auth;
 using BetterExpenses.API.Services.Options;
 using BetterExpenses.Common.Database.Sql;
 using BetterExpenses.Common.Models.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BetterExpenses.API.Services;

@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using AutoMapper;
+﻿using AutoMapper;
 using BetterExpenses.Common.Models.Expenses;
 using Bunq.Sdk.Model.Generated.Endpoint;
 

@@ -135,6 +135,27 @@ namespace BetterExpenses.Common.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("BetterExpenses.Common.Models.User.RefreshToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Valid")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("BetterExpenses.Common.Models.User.UserMonetaryAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -160,10 +181,13 @@ namespace BetterExpenses.Common.Migrations
                     b.ToTable("MonetaryAccounts");
                 });
 
-            modelBuilder.Entity("BetterExpenses.Common.Models.User.UserOptions", b =>
+            modelBuilder.Entity("BetterExpenses.Common.Models.User.UserSettings", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("BunqLinked")
+                        .HasColumnType("boolean");
 
                     b.Property<TimeSpan>("FetchPaymentsFrom")
                         .HasColumnType("interval");
@@ -303,6 +327,17 @@ namespace BetterExpenses.Common.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BetterExpenses.Common.Models.User.RefreshToken", b =>
+                {
+                    b.HasOne("BetterExpenses.Common.Models.User.BetterExpensesUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BetterExpenses.Common.Models.User.UserMonetaryAccount", b =>
                 {
                     b.HasOne("BetterExpenses.Common.Models.User.BetterExpensesUser", null)
@@ -312,11 +347,11 @@ namespace BetterExpenses.Common.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BetterExpenses.Common.Models.User.UserOptions", b =>
+            modelBuilder.Entity("BetterExpenses.Common.Models.User.UserSettings", b =>
                 {
                     b.HasOne("BetterExpenses.Common.Models.User.BetterExpensesUser", "User")
-                        .WithOne("UserOptions")
-                        .HasForeignKey("BetterExpenses.Common.Models.User.UserOptions", "Id")
+                        .WithOne("UserSettings")
+                        .HasForeignKey("BetterExpenses.Common.Models.User.UserSettings", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -378,7 +413,9 @@ namespace BetterExpenses.Common.Migrations
                 {
                     b.Navigation("Accounts");
 
-                    b.Navigation("UserOptions")
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("UserSettings")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

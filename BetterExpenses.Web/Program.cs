@@ -1,21 +1,25 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BetterExpenses.Web;
-using System.Net.Http;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using BetterExpenses.Web.Services;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
 var apiBaseAddress = builder.Configuration["Api:BaseUrl"] ?? throw new Exception("API base address not configured");
 
-builder.Services.AddHttpClient("WebAPI", client => client.BaseAddress = new Uri(apiBaseAddress))
-    .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+builder.Services.AddScoped(sp => 
+    new HttpClient
+    {
+        BaseAddress = new Uri(apiBaseAddress)
+    });
 
-builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
-    .CreateClient("WebAPI"));
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 await builder.Build().RunAsync();

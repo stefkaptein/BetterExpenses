@@ -1,6 +1,5 @@
 ﻿using BetterExpenses.Common.Database.Sql;
 using BetterExpenses.Common.Models.Tasks;
-using BetterExpenses.Common.Models.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

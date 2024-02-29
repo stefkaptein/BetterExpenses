@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BetterExpenses.Common.Models.Expenses;
-using BetterExpenses.Common.ServiceModels;
 using BetterExpenses.Common.Services.Context;
 using Bunq.Sdk.Model.Generated.Endpoint;
 

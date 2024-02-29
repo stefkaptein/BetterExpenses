@@ -4,32 +4,35 @@
 <AuthorizeView>
     <Authorized>
         Hello, @context.User.Identity?.Name!
-        <button class="nav-link btn btn-link" @onclick="BeginLogOut">Log out</button>
+        <a class="nav-link btn btn-link" href="auth/logout">Log out</a>
+        <a class="nav-link btn btn-link" href="auth/userSettings">User settings</a>
     </Authorized>
     <NotAuthorized>
-        <a href="authentication/login" @onclick="BeginLogIn">Log in</a>
+        <a class="nav-link btn btn-link" href="auth/login">Log in</a>
+        <a class="nav-link btn btn-link" href="auth/register">Register</a>
     </NotAuthorized>
 </AuthorizeView>
 
 @code{
 
-    public void BeginLogOut()
+    private void BeginLogOut()
     {
-        Navigation.NavigateToLogout("authentication/logout");
+        Navigation.NavigateToLogout("auth/logout");
     }
-    
-    public void BeginLogIn()
+
+    private void BeginLogIn()
     {
-        InteractiveRequestOptions requestOptions =
-            new()
-            {
-                Interaction = InteractionType.SignIn,
-                ReturnUrl = Navigation.Uri,
-            };
-
-        requestOptions.TryAddAdditionalParameter("prompt", "login");
-        requestOptions.TryAddAdditionalParameter("loginHint", "peter@contoso.com");
-
-        Navigation.NavigateToLogin("authentication/login", requestOptions);
+        Navigation.NavigateToLogin("auth/login");
     }
+
+    private void BeginRegistration()
+    {
+        Navigation.NavigateTo("auth/register");
+    }
+
+    private void ToUserSettings()
+    {
+        Navigation.NavigateToLogout("auth/userSettings");
+    }
+
 }

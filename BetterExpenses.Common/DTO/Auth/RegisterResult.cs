@@ -1,4 +1,4 @@
-﻿namespace BetterExpenses.API.Models.Accounts;
+﻿namespace BetterExpenses.Common.DTO.Auth;
 
 public class RegisterResult
 {

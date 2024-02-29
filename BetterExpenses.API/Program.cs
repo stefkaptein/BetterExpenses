@@ -1,6 +1,5 @@
 using BetterExpenses.API.Services;
 using BetterExpenses.Common.Database;
-using BetterExpenses.Common.Models.User;
 using BetterExpenses.Common.Services;
 using Microsoft.OpenApi.Models;
 
@@ -32,10 +31,25 @@ builder.Services.AddSwaggerGen(option =>
                     Id="Bearer"
                 }
             },
-            new string[]{}
+            []
         }
     });
 });
+
+const string blazorWebAppOrigins = "Blazor Web App";
+
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(name: blazorWebAppOrigins,
+            policy  =>
+            {
+                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            });
+    });
+}
+
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 
@@ -66,5 +80,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(blazorWebAppOrigins);
 
 app.Run();

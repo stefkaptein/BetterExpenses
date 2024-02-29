@@ -1,6 +1,5 @@
 using BetterExpenses.CalculatorWorker.Workers;
 using BetterExpenses.CalculatorWorker.Workers.Accounts;
-using BetterExpenses.CalculatorWorker.Workers.Expenses;
 using BetterExpenses.CalculatorWorker.Workers.Expenses.Fetching;
 using BetterExpenses.Common.Database;
 using BetterExpenses.Common.Services;

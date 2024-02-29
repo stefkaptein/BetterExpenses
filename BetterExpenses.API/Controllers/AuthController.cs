@@ -1,12 +1,11 @@
-﻿using BetterExpenses.API.Models.Accounts;
-using BetterExpenses.API.Models.Login;
-using BetterExpenses.API.Services.Auth;
+﻿using BetterExpenses.API.Services.Auth;
+using BetterExpenses.Common.DTO.Auth;
 using BetterExpenses.Common.Models.Tasks;
 using BetterExpenses.Common.Models.User;
 using BetterExpenses.Common.Services.Context;
 using BetterExpenses.Common.Services.Tasks;
+using BetterExpenses.Common.Services.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BetterExpenses.API.Controllers;
@@ -15,14 +14,15 @@ public class AuthController(
     IBunqAuthService bunqAuthService,
     IApiContextService apiContextService,
     ICalculatorTaskService calculatorTaskService,
-    UserManager<BetterExpensesUser> userManager,
-    IJwtTokenService tokenService)
+    IJwtTokenService tokenService,
+    IUserOptionsService userOptionsService)
     : AuthorizedApiControllerBase
 {
+    private readonly IBunqAuthService _bunqAuthService = bunqAuthService;
     private readonly IApiContextService _apiContextService = apiContextService;
     private readonly ICalculatorTaskService _calculatorTaskService = calculatorTaskService;
-    private readonly UserManager<BetterExpensesUser> _userManager = userManager;
     private readonly IJwtTokenService _tokenService = tokenService;
+    private readonly IUserOptionsService _userOptionsService = userOptionsService;
 
     private readonly LoginResult _loginFailed = new()
         { Successful = false, Error = "Username and password combination is invalid." };
@@ -33,7 +33,7 @@ public class AuthController(
     {
         var newUser = new BetterExpensesUser { UserName = model.Email, Email = model.Email };
 
-        var result = await _userManager.CreateAsync(newUser, model.Password);
+        var result = await UserManager.CreateAsync(newUser, model.Password);
 
         if (!result.Succeeded)
         {
@@ -49,31 +49,49 @@ public class AuthController(
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
-        var user = await _userManager.FindByEmailAsync(login.Email);
+        var user = await UserManager.FindByEmailAsync(login.Email);
         if (user == null)
         {
             return Unauthorized(_loginFailed);
         }
 
-        if (!await _userManager.CheckPasswordAsync(user, login.Password))
+        if (!await UserManager.CheckPasswordAsync(user, login.Password))
         {
             return Unauthorized(_loginFailed);
         }
 
-        var token = _tokenService.GenerateToken(user);
+        var authToken = _tokenService.GenerateToken(user);
+        var refreshToken = await _tokenService.GenerateRefreshToken(user);
 
-        return Ok(new LoginResult { Successful = true, Token = token });
+        return Ok(new LoginResult { Successful = true, AuthToken = authToken, RefreshToken = refreshToken});
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel refreshModel)
+    {
+        var user = await UserManager.FindByIdAsync(refreshModel.UserId.ToString());
+        if (user == null ||!await _tokenService.ValidateRefreshToken(refreshModel.UserId, refreshModel.RefreshToken))
+        {
+            return Unauthorized();
+        }
+
+        await _tokenService.InvalidateRefreshToken(refreshModel.RefreshToken);
+        var authToken = _tokenService.GenerateToken(user);
+        var refreshToken = await _tokenService.GenerateRefreshToken(user);
+        
+        return Ok(new LoginResult { Successful = true, AuthToken = authToken, RefreshToken = refreshToken});
     }
 
     [HttpGet]
     public async Task<IActionResult> LinkBunq()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await UserManager.GetUserAsync(User);
         if (user == null)
         {
             return Unauthorized();
         }
-        return Redirect(bunqAuthService.GetAuthUri(user.Id));
+        return Redirect(_bunqAuthService.GetAuthUri(user.Id));
     }
 
     [HttpGet]
@@ -85,16 +103,19 @@ public class AuthController(
             return Unauthorized("Invalid state");
         }
 
-        if (!bunqAuthService.TryGetUserIdForState(stateId, out var userId))
+        if (!_bunqAuthService.TryGetUserIdForState(stateId, out var userId))
         {
             return Unauthorized("State expired or is invalid");
         }
 
-        var accessToken = await bunqAuthService.GetAccessToken(code);
-        await _apiContextService.CreateAndSaveNewApiContext(userId, accessToken);
+        var accessToken = await _bunqAuthService.GetAccessToken(code);
 
-        await AddFetchAccountTask(userId);
-
+        await Task.WhenAll(
+            _apiContextService.CreateAndSaveNewApiContext(userId, accessToken),
+            AddFetchAccountTask(userId),
+            _userOptionsService.UpdateUserOptions(userId, new UserSettings { BunqLinked = true })
+        );
+        
         return Ok("Ok");
     }
 

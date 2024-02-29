@@ -4,6 +4,9 @@ namespace BetterExpenses.Common.Models.User;
 
 public class BetterExpensesUser : IdentityUser<Guid>
 {
+    public List<RefreshToken> RefreshTokens { get; set; }
+    
     public List<UserMonetaryAccount> Accounts { get; set; } = [];
-    public UserOptions UserOptions { get; set; } = new();
+    
+    public UserSettings UserSettings { get; set; } = new();
 }

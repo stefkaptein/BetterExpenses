@@ -3,16 +3,16 @@ using BetterExpenses.Common.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using UserOptions = BetterExpenses.Common.Models.User.UserOptions;
 
 namespace BetterExpenses.Common.Database.Sql;
 
 public class SqlDbContext : IdentityDbContext<BetterExpensesUser, IdentityRole<Guid>, Guid>
 {
     public DbSet<UserMonetaryAccount> MonetaryAccounts { get; set; }
-    public DbSet<UserOptions> UserOptions { get; set; }
+    public DbSet<UserSettings> UserOptions { get; set; }
     public DbSet<FetchAccountsTask> FetchAccountsTasks { get; set; }
     public DbSet<FetchExpensesTask> FetchExpensesTasks { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     public SqlDbContext(DbContextOptions<SqlDbContext> options) : base(options)
     {
@@ -43,8 +43,8 @@ public class SqlDbContext : IdentityDbContext<BetterExpensesUser, IdentityRole<G
         }
         
         modelBuilder.Entity<BetterExpensesUser>()
-            .HasOne(e => e.UserOptions)
+            .HasOne(e => e.UserSettings)
             .WithOne(e => e.User)
-            .HasForeignKey<UserOptions>();
+            .HasForeignKey<UserSettings>();
     }
 }

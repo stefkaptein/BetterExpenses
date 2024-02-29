@@ -1,9 +1,7 @@
 ﻿using BetterExpenses.Common.Models.Exceptions;
-using BetterExpenses.Common.ServiceModels;
 using BetterExpenses.Common.Services.Context;
 using Bunq.Sdk.Http;
 using Bunq.Sdk.Model.Core;
-using Bunq.Sdk.Model.Generated.Endpoint;
 
 namespace BetterExpenses.Common.Services.Bunq;
 
