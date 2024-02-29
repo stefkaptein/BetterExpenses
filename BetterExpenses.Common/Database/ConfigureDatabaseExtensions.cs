@@ -9,10 +9,13 @@ namespace BetterExpenses.Common.Database;
 
 public static class ConfigureDatabaseExtensions
 {
-    public static IServiceCollection ConfigurePostgres(this IServiceCollection services, ConfigurationManager configuration)
+    public static IServiceCollection ConfigurePostgres(this IServiceCollection services, ConfigurationManager configuration, Action<DbContextOptionsBuilder>? additionalOptions = null)
     {
         services.AddDbContext<SqlDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("Postgres")));
+        {
+            options.UseNpgsql(configuration.GetConnectionString("Postgres"));
+            additionalOptions?.Invoke(options);
+        });
         
         return services;
     }

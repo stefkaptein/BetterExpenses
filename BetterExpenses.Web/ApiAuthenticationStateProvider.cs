@@ -1,43 +1,65 @@
 ﻿using System.Net.Http.Headers;
+using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Text.Json;
 using BetterExpenses.Common.DTO.Auth;
+using BetterExpenses.Web.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace BetterExpenses.Web
 {
-    public class ApiAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
-        : AuthenticationStateProvider
+    public sealed class ApiAuthenticationStateProvider(ITokenService tokenService) : AuthenticationStateProvider
     {
-        private static readonly ClaimsPrincipal AnonymousUser = new(new ClaimsIdentity());
+        private readonly ITokenService _tokenService = tokenService;
+        private static readonly AuthenticationState AnonymousUser = GetUserState([]);
 
+        private const string JwtAuthenticationTypeString = "Jwt";
+        
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var savedToken = await localStorage.GetItemAsync<TokenWithExperation>("authToken");
-
-            if (savedToken == null || string.IsNullOrWhiteSpace(savedToken.Token))
+            List<Claim> claims;
+            AuthenticationState state;
+            if (await _tokenService.AuthTokenValid())
             {
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                claims = await _tokenService.GetClaims();
+                state = GetAuthenticatedUserState(claims);
+            } 
+            else if (!await _tokenService.RefreshToken())
+            {
+                return AnonymousUser;
             }
-
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", savedToken.Token);
-
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken.Token), "jwt")));
+            else
+            {
+                claims = await _tokenService.GetClaims();
+                state = GetAuthenticatedUserState(claims);
+            }
+            
+            return state;
         }
 
-        public void SetJwtToken(IEnumerable<Claim> claims)
+        /// <summary>
+        /// Before calling this method, ensure that the tokens are not null in the LoginResult!
+        /// </summary>
+        public async Task UpdateLoginState(LoginResult result)
         {
-            var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(claims, "apiauth"));
-            var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
-            NotifyAuthenticationStateChanged(authState);
+            await _tokenService.SetTokens(result.AuthToken!, result.RefreshToken!);
+            var state = await GetAuthenticationStateAsync();
+            NotifyAuthenticationStateChanged(Task.FromResult(state));
         }
 
-        public void LogoutUser()
+        public async Task ResetLoginState()
         {
-            var authState = Task.FromResult(new AuthenticationState(AnonymousUser));
-            NotifyAuthenticationStateChanged(authState);
+            await _tokenService.ClearTokens();
+            var state = await GetAuthenticationStateAsync();
+            NotifyAuthenticationStateChanged(Task.FromResult(state));
         }
+
+        private static AuthenticationState GetAuthenticatedUserState(IEnumerable<Claim> claims) =>
+            GetUserState(claims, JwtAuthenticationTypeString);
+        
+        private static AuthenticationState GetUserState(IEnumerable<Claim> claims, string? authType = null) =>
+            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims, authType)));
     }
 }

@@ -20,14 +20,12 @@ public interface IAuthService
 public class AuthService(
     HttpClient httpClient,
     AuthenticationStateProvider authenticationStateProvider,
-    ILocalStorageService localStorage,
-    ITokenService tokenService)
+    ILocalStorageService localStorage)
     : IAuthService
 {
     private readonly HttpClient _httpClient = httpClient;
-    private readonly AuthenticationStateProvider _authenticationStateProvider = authenticationStateProvider;
+    private readonly ApiAuthenticationStateProvider _authenticationStateProvider = (ApiAuthenticationStateProvider)authenticationStateProvider;
     private readonly ILocalStorageService _localStorage = localStorage;
-    private readonly ITokenService _tokenService = tokenService;
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -56,13 +54,13 @@ public class AuthService(
             return loginResult;
         }
 
-        await _tokenService.SetTokens(loginResult.AuthToken, loginResult.RefreshToken);
+        await _authenticationStateProvider.UpdateLoginState(loginResult);
 
         return loginResult;
     }
 
     public async Task Logout()
     {
-        await _tokenService.ClearTokens();
+        await _authenticationStateProvider.ResetLoginState();
     }
 }

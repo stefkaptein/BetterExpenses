@@ -7,6 +7,7 @@ using BetterExpenses.Common.Services.Tasks;
 using BetterExpenses.Common.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BetterExpenses.API.Controllers;
 
@@ -70,13 +71,12 @@ public class AuthController(
     [AllowAnonymous]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenModel refreshModel)
     {
-        var user = await UserManager.FindByIdAsync(refreshModel.UserId.ToString());
+        var user = await UserManager.Users.FirstOrDefaultAsync(x => x.Id == refreshModel.UserId);
         if (user == null ||!await _tokenService.ValidateRefreshToken(refreshModel.UserId, refreshModel.RefreshToken))
         {
             return Unauthorized();
         }
 
-        await _tokenService.InvalidateRefreshToken(refreshModel.RefreshToken);
         var authToken = _tokenService.GenerateToken(user);
         var refreshToken = await _tokenService.GenerateRefreshToken(user);
         

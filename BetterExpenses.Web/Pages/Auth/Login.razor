@@ -22,15 +22,25 @@
 
                 <div class="form-group mb-3">
                     <label for="email">Email address</label>
-                    <InputText Id="email" Class="form-control" @bind-Value="_loginModel.Email"/>
+                    <InputText disabled="@_busy" Id="email" Class="form-control" @bind-Value="_loginModel.Email"/>
                     <ValidationMessage For="@(() => _loginModel.Email)"/>
                 </div>
                 <div class="form-group mb-3">
                     <label for="password">Password</label>
-                    <InputText Id="password" type="password" Class="form-control" @bind-Value="_loginModel.Password"/>
+                    <InputText disabled="@_busy" Id="password" type="password" Class="form-control" @bind-Value="_loginModel.Password"/>
                     <ValidationMessage For="@(() => _loginModel.Password)"/>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <div class="row mb-3">
+                    <div class="col-auto">
+                        <button disabled="@_busy" type="submit" class="btn btn-primary">
+                            <span role="status">Login</span>
+                            <span class="spinner-border spinner-border-sm @(_busy ? null : "visually-hidden")" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+                <p>
+                    <a href="/auth/register">Register</a>
+                </p>
             </EditForm>
         </div>
     </div>
@@ -41,22 +51,32 @@
     private readonly LoginModel _loginModel = new();
     private bool _showErrors;
     private string _error = "";
+    private bool _busy;
 
     private async Task HandleLogin()
     {
         _showErrors = false;
+        _busy = true;
 
-        var result = await AuthService.Login(_loginModel);
+        try
+        {
+            var result = await AuthService.Login(_loginModel);
 
-        if (result.Successful)
-        {
-            NavigationManager.NavigateTo("/");
+            if (result.Successful)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                _error = result.Error ?? "Login failed";
+                _showErrors = true;
+            }
         }
-        else
+        finally
         {
-            _error = result.Error ?? "Login failed";
-            _showErrors = true;
+            _busy = false;
         }
+        
     }
 
 }

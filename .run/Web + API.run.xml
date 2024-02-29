@@ -1,0 +1,7 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Web + API" type="CompoundRunConfigurationType">
+    <toRun name="BetterExpenses.API: https" type="LaunchSettings" />
+    <toRun name="BetterExpenses.Web: https" type="LaunchSettings" />
+    <method v="2" />
+  </configuration>
+</component>
