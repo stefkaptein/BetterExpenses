@@ -8,6 +8,7 @@ public interface IApiContextCryptoFileService
 {
     public Task SaveApiContext(ApiContext apiContext, Guid userId);
     public Task<ApiContext> LoadApiContext(Guid userId);
+    public void DeleteApiContext(Guid userId);
 }
 
 public class ApiContextCryptoFileService(
@@ -33,5 +34,11 @@ public class ApiContextCryptoFileService(
         var fileBytes = await File.ReadAllBytesAsync(filePath);
         var contextJsonString = _cryptoService.Decrypt(fileBytes, _key);
         return ApiContext.FromJson(contextJsonString);
+    }
+
+    public void DeleteApiContext(Guid userId)
+    {
+        var filePath = Path.Join(_path, userId.ToString());
+        File.Delete(filePath);
     }
 }

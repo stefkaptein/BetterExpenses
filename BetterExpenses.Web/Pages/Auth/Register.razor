@@ -1,7 +1,8 @@
 @page "/auth/register"
 @using BetterExpenses.Common.DTO.Auth
 @using BetterExpenses.Web.Services
-@inject IAuthService AuthService
+@using BetterExpenses.Web.Services.Api
+@inject IAuthApiService AuthApiService
 @inject NavigationManager NavigationManager
 @attribute [AllowAnonymous]
 
@@ -52,7 +53,7 @@
     {
         _showErrors = false;
 
-        var result = await AuthService.Register(_registerModel);
+        var result = await AuthApiService.Register(_registerModel);
 
         if (result.Successful)
         {

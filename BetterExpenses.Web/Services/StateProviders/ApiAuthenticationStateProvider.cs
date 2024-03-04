@@ -1,19 +1,15 @@
-﻿using System.Net.Http.Headers;
-using System.Reflection.Metadata;
-using System.Security.Claims;
-using System.Text.Json;
+﻿using System.Security.Claims;
 using BetterExpenses.Common.DTO.Auth;
-using BetterExpenses.Web.Services;
-using Blazored.LocalStorage;
+using BetterExpenses.Web.Services.Api;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace BetterExpenses.Web
+namespace BetterExpenses.Web.Services.StateProviders
 {
-    public sealed class ApiAuthenticationStateProvider(ITokenService tokenService) : AuthenticationStateProvider
+    public sealed class ApiAuthenticationStateProvider(ITokenService tokenService, IAuthApiService authApiService) : AuthenticationStateProvider
     {
         private readonly ITokenService _tokenService = tokenService;
         private static readonly AuthenticationState AnonymousUser = GetUserState([]);
+        private readonly IAuthApiService _authApiService = authApiService;
 
         private const string JwtAuthenticationTypeString = "Jwt";
         
@@ -42,11 +38,14 @@ namespace BetterExpenses.Web
         /// <summary>
         /// Before calling this method, ensure that the tokens are not null in the LoginResult!
         /// </summary>
-        public async Task UpdateLoginState(LoginResult result)
+        public async Task<LoginResult> Login(LoginModel loginModel)
         {
+            var result = await _authApiService.Login(loginModel);
+            
             await _tokenService.SetTokens(result.AuthToken!, result.RefreshToken!);
             var state = await GetAuthenticationStateAsync();
             NotifyAuthenticationStateChanged(Task.FromResult(state));
+            return result;
         }
 
         public async Task ResetLoginState()

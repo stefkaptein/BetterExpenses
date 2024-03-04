@@ -1,0 +1,60 @@
+﻿@page "/auth/linkBunq/callback"
+@using Microsoft.AspNetCore.WebUtilities
+@using BetterExpenses.Web.Services.Api
+@using BetterExpenses.Web.Services.StateProviders
+@inject JSRuntime JsRuntime
+@inject NavigationManager NavManager
+@inject IAuthApiService AuthApiService
+
+<div class="container">
+    <div class="text-center">
+        @if (!_finished)
+        {
+            <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4>Hold on while we connect your account....</h4>
+        }
+        else
+        {
+            if (_success)
+            {
+                <span class="material-symbols-outlined md-48 success">
+                    done
+                </span>
+                <p>Done! You will be redirected shortly</p>
+            }
+            else
+            {
+                <span class="material-symbols-outlined md-48 danger">
+                    error
+                </span>
+                <p>Error. Please try again later</p>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private bool _finished;
+    private bool _success;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var queryStrings = QueryHelpers.ParseQuery(uri.Query);
+        
+        if(!queryStrings.TryGetValue("code", out var code) || !queryStrings.TryGetValue("state", out var state) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
+        {
+            await JsRuntime.InvokeAsync<object>("close");
+            return;
+        }
+
+        _success = await AuthApiService.GetAuthToken(code!, state!);
+        _finished = true;
+        StateHasChanged();
+        
+        await Task.Delay(TimeSpan.FromSeconds(3));
+        await JsRuntime.InvokeAsync<object>("close");
+    }
+}

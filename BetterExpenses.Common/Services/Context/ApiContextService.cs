@@ -14,6 +14,7 @@ public interface IApiContextService
     public Task CreateAndSaveNewApiContext(Guid userId, string apiKey);
     public Task<ApiContext> GetApiContextOrLoad(Guid userId);
     public Task EnsureApiContextExists(Guid userId);
+    public void RemoveApiContext(Guid userId);
 }
 
 public class ApiContextService(
@@ -41,6 +42,10 @@ public class ApiContextService(
     }
 
     public async Task EnsureApiContextExists(Guid userId) => await GetApiContextOrLoad(userId);
+    public void RemoveApiContext(Guid userId)
+    {
+        _apiContextCryptoFileService.DeleteApiContext(userId);
+    }
 
     public async Task<ApiContext> GetApiContextOrLoad(Guid userId)
     {

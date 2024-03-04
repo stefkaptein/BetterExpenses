@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BetterExpenses.Web;
+using BetterExpenses.Web.Models.Options;
 using BetterExpenses.Web.Services;
+using BetterExpenses.Web.Services.Api;
+using BetterExpenses.Web.Services.StateProviders;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -17,10 +20,15 @@ builder.Services.AddScoped(sp =>
         BaseAddress = new Uri(apiBaseAddress)
     });
 
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Auth"));
+
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
+
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IAuthApiService, AuthApiApiService>();
+builder.Services.AddScoped<IUserApiService, UserApiService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 await builder.Build().RunAsync();

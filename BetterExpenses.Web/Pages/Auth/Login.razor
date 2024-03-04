@@ -1,7 +1,9 @@
 @page "/auth/login"
 @using BetterExpenses.Common.DTO.Auth
 @using BetterExpenses.Web.Services
-@inject IAuthService AuthService
+@using BetterExpenses.Web.Services.Api
+@using BetterExpenses.Web.Services.StateProviders
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @attribute [AllowAnonymous]
 
@@ -60,7 +62,7 @@
 
         try
         {
-            var result = await AuthService.Login(_loginModel);
+            var result = await ((ApiAuthenticationStateProvider)AuthenticationStateProvider).Login(_loginModel);
 
             if (result.Successful)
             {

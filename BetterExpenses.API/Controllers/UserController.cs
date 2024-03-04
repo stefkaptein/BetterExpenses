@@ -12,7 +12,7 @@ public class UserController(IMonetaryAccountService monetaryAccountService, IUse
     private readonly IUserOptionsService _userOptionsService = userOptionsService;
 
     [HttpGet]
-    public async Task<IActionResult> GetUserSettings()
+    public async Task<IActionResult> Settings()
     {
         var user = await GetUser();
 
@@ -23,5 +23,24 @@ public class UserController(IMonetaryAccountService monetaryAccountService, IUse
         }
 
         return Ok(Mapper.Map<UserSettingsDto>(userSettings));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> MonetaryAccounts()
+    {
+        var user = await GetUser();
+
+        var accounts = await _monetaryAccountService.GetAccounts(user.Id);
+
+        return Ok(accounts);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateAnalyseAccount(int accountId, bool analyse)
+    {
+        var user = await GetUser();
+        await _monetaryAccountService.SetAccountsToAnalyse(user.Id,
+            new Dictionary<int, bool> { { accountId, analyse } });
+        return Ok();
     }
 }

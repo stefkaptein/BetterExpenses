@@ -9,7 +9,7 @@ namespace BetterExpenses.Common.Services.User;
 public interface IUserOptionsService
 {
     public Task<UserSettings?> GetOptionsForUser(Guid userId);
-    public Task UpdateUserOptions(Guid userId, UserSettings settingsUpdates);
+    public Task UpdateUserOptions(Guid userId, Action<UserSettings> settingsUpdates);
     public Task SetBunqLinked(Guid userId, bool value);
 }
 
@@ -25,7 +25,7 @@ public class UserOptionsService(SqlDbContext dbContext, IMapper mapper) : IUserO
             .FirstOrDefaultAsync(x => x.Id == userId);
     }
 
-    public async Task UpdateUserOptions(Guid userId, UserSettings settingsUpdates)
+    public async Task UpdateUserOptions(Guid userId, Action<UserSettings> settingsUpdates)
     {
         var optionsFromDb = await _userOptionsSet
             .FirstOrDefaultAsync(x => x.Id == userId);
@@ -34,7 +34,8 @@ public class UserOptionsService(SqlDbContext dbContext, IMapper mapper) : IUserO
             throw new IdNotFoundInDatabase(userId.ToString());
         }
 
-        mapper.Map(settingsUpdates, optionsFromDb);
+        settingsUpdates(optionsFromDb);
+        
         await _dbContext.SaveChangesAsync();
     }
 

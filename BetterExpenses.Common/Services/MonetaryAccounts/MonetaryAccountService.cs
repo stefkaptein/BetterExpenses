@@ -10,6 +10,7 @@ public interface IMonetaryAccountService
     public Task<List<int>> GetAccountIdsToAnalyse(Guid userId);
     public Task<List<UserMonetaryAccount>> GetAccountsToAnalyse(Guid userId);
     public Task SetAccountsToAnalyse(Guid userId, Dictionary<int, bool> accountsAnalyseStatus);
+    public Task<List<UserMonetaryAccount>> GetAccounts(Guid userId);
 }
 
 public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountService
@@ -44,9 +45,9 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
     public async Task SetAccountsToAnalyse(Guid userId, Dictionary<int, bool> accountsAnalyseStatus)
     {
         var accountIds = accountsAnalyseStatus.Keys.ToList();
-        var monetaryAccountsFromDb = _monetaryAccountsDbSet
+        var monetaryAccountsFromDb = await _monetaryAccountsDbSet
             .Where(x => accountIds.Contains(x.Id))
-            .ToList();
+            .ToListAsync();
 
         foreach (var account in monetaryAccountsFromDb)
         {
@@ -54,5 +55,12 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
         }
 
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<UserMonetaryAccount>> GetAccounts(Guid userId)
+    {
+        return await _monetaryAccountsDbSet
+            .Where(x => x.BetterExpensesUserId == userId)
+            .ToListAsync();
     }
 }

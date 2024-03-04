@@ -26,7 +26,7 @@ public static class ConfigureAuthenticationExtensions
             options.Audience = configuration["Jwt.Issuer"]!;
             options.Secret = jwtSecret;
         });
-
+        
         services.AddIdentityCore<BetterExpensesUser>()
             .AddEntityFrameworkStores<SqlDbContext>();
 
@@ -34,8 +34,7 @@ public static class ConfigureAuthenticationExtensions
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,
                 options =>
                 {
-                    
-                    options.Audience = configuration["Jwt:Audience"];
+                    options.IncludeErrorDetails = EnvironmentIsDevelopment();
                     options.Authority = configuration["Jwt:Issuer"];
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -45,7 +44,7 @@ public static class ConfigureAuthenticationExtensions
                         ValidateIssuerSigningKey = false,
                         ClockSkew = TimeSpan.FromSeconds(100),
                         ValidIssuer = configuration["Jwt:Issuer"],
-                        ValidAudience = configuration["Jwt:Audience"],
+                        ValidAudiences = configuration.GetSection("Jwt:Audiences").Get<string[]>(),
                         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtSecret))
                     };
                 });

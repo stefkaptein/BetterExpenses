@@ -7,9 +7,9 @@ namespace BetterExpenses.API.Services.Auth;
 
 public interface IBunqAuthService
 {
-    public string GetAuthUri(Guid userId);
+    public string GetAuthUri(Guid userId, string? redirectUrl);
     public bool TryGetUserIdForState(Guid state, out Guid userId);
-    public Task<string> GetAccessToken(string authCode);
+    public Task<string> GetAccessToken(string authCode, string? redirectUrl);
 }
 
 public class BunqAuthService(
@@ -19,7 +19,7 @@ public class BunqAuthService(
 {
     private readonly string _clientId = oauthClientOptions.Value.ClientId;
     private readonly string _clientSecret = oauthClientOptions.Value.ClientSecret;
-    private readonly string _redirectUri = authOptions.Value.RedirectUri;
+    private readonly string _apiRedirectUri = authOptions.Value.RedirectUri;
 
     private readonly Uri _baseOauthApiUri = new(authOptions.Value.BaseUri);
     private readonly Uri _baseBunqApiUri = new(bunqOptions.Value.BaseApiPath);
@@ -31,7 +31,7 @@ public class BunqAuthService(
     private readonly MemoryCache _stateUserIdCache = new(new MemoryCacheOptions( ));
     private readonly HttpClient _httpClient = new();
 
-    public string GetAuthUri(Guid userId)
+    public string GetAuthUri(Guid userId, string? redirectUrl = null)
     {
         var uriBuilder = new UriBuilder(AuthUri);
             
@@ -46,7 +46,7 @@ public class BunqAuthService(
         var queryParams = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
         queryParams["response_type"] = "code";
         queryParams["client_id"] = _clientId;
-        queryParams["redirect_uri"] = _redirectUri;
+        queryParams["redirect_uri"] = redirectUrl ?? _apiRedirectUri;
         queryParams["state"] = stateId.ToString();
 
         uriBuilder.Query = queryParams.ToString();
@@ -56,7 +56,7 @@ public class BunqAuthService(
 
     public bool TryGetUserIdForState(Guid state, out Guid userId) => _stateUserIdCache.TryGetValue(state, out userId);
 
-    public async Task<string> GetAccessToken(string authCode)
+    public async Task<string> GetAccessToken(string authCode, string? callback = null)
     {
         var uriBuilder = new UriBuilder(TokenUri);
 
@@ -66,7 +66,7 @@ public class BunqAuthService(
         queryParams["code"] = authCode;
         queryParams["client_id"] = _clientId;
         queryParams["client_secret"] = _clientSecret;
-        queryParams["redirect_uri"] = _redirectUri;
+        queryParams["redirect_uri"] = callback ?? _apiRedirectUri;
 
         uriBuilder.Query = queryParams.ToString();
         var url = uriBuilder.ToString();

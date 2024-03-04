@@ -1,3 +1,4 @@
+global using static BetterExpenses.Common.Extensions.EnvironmentExtensions;
 using BetterExpenses.API.Services;
 using BetterExpenses.Common.Database;
 using BetterExpenses.Common.Services;
@@ -39,17 +40,9 @@ builder.Services.AddSwaggerGen(option =>
 
 const string blazorWebAppOrigins = "Blazor Web App";
 
-if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-{
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy(name: blazorWebAppOrigins,
-            policy  =>
-            {
-                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-            });
-    });
-}
+
+
+builder.Services.ConfigureCors();
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
@@ -77,11 +70,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(blazorWebAppOrigins);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseCors(blazorWebAppOrigins);
 
 app.Run();

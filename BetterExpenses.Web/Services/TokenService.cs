@@ -1,15 +1,10 @@
 ﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text.Json;
 using BetterExpenses.Common.DTO.Auth;
 using BetterExpenses.Common.Extensions;
+using BetterExpenses.Web.Services.Api;
 using Blazored.LocalStorage;
-using Bunq.Sdk.Model.Generated.Endpoint;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.IdentityModel.JsonWebTokens;
-using MongoDB.Bson.Serialization.Serializers;
-using JsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
 
 namespace BetterExpenses.Web.Services;
 
@@ -24,12 +19,12 @@ public interface ITokenService
     public Task ClearTokens();
 }
 
-public class TokenService(HttpClient httpClient, ILocalStorageService localStorage) : ITokenService
+public class TokenService(HttpClient httpClient, ILocalStorageService localStorage, IAuthApiService authApiService)
+    : ITokenService
 {
+    private readonly IAuthApiService _authApiService = authApiService;
     private readonly HttpClient _httpClient = httpClient;
     private readonly ILocalStorageService _localStorage = localStorage;
-
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     private const string TokensInternalStorageName = "tokens";
     private const string UserIdInternalStorageName = "userId";
@@ -89,9 +84,7 @@ public class TokenService(HttpClient httpClient, ILocalStorageService localStora
             UserId = userId
         };
 
-        var response = await _httpClient.PostAsJsonAsync("/api/auth/refresh", refreshTokenModel);
-        var loginResult =
-            JsonSerializer.Deserialize<LoginResult>(await response.Content.ReadAsStringAsync(), JsonSerializerOptions);
+        var loginResult = await _authApiService.RefreshToken(refreshTokenModel);
 
         if (loginResult?.Successful != true)
         {
@@ -110,7 +103,7 @@ public class TokenService(HttpClient httpClient, ILocalStorageService localStora
 
     private void SetAuthenticationHeader(string authToken)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = 
+        _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("bearer", authToken);
     }
 

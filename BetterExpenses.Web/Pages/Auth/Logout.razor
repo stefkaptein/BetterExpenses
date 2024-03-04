@@ -1,6 +1,8 @@
 @page "/auth/logout"
 @using BetterExpenses.Web.Services
-@inject IAuthService AuthService
+@using BetterExpenses.Web.Services.Api
+@using BetterExpenses.Web.Services.StateProviders
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
 
@@ -8,7 +10,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await AuthService.Logout();
+        await ((ApiAuthenticationStateProvider)AuthenticationStateProvider).ResetLoginState();
         NavigationManager.NavigateTo("/");
     }
 

@@ -49,11 +49,9 @@ public class FetchAccountsTaskRunner(
             UserId = task.UserId,
             FetchTill = DateTime.Today.Subtract(userOptions.FetchPaymentsFrom).ToUniversalTime()
         };
-        
-        await Task.WhenAll(
-            _calculatorTaskService.DeleteTask<FetchAccountsTask>(task.Id),
-            _calculatorTaskService.AddTask(fetchExpensesTask)
-        );
+
+        await _calculatorTaskService.DeleteTask<FetchAccountsTask>(task.Id);
+        await _calculatorTaskService.AddTask(fetchExpensesTask);
         
         logger.LogDebug("Fetching accounts completed");
         return true;

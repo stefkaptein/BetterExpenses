@@ -24,7 +24,7 @@ public class JwtTokenService : IJwtTokenService
     private readonly SqlDbContext _dbContext;
     private readonly DbSet<RefreshToken> _refreshTokens;
 
-    private readonly TimeSpan _tokenExpirationTimeSpan = TimeSpan.FromSeconds(30);
+    private readonly TimeSpan _tokenExpirationTimeSpan = TimeSpan.FromMinutes(15);
     private readonly TimeSpan _refreshTokenExpirationTimeSpan = TimeSpan.FromDays(7);
     private readonly string _issuer;
     private readonly SigningCredentials _signingCredentials;

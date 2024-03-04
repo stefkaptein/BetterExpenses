@@ -1,0 +1,81 @@
+﻿@page "/Auth/UserSettings"
+@using BetterExpenses.Common.DTO.User
+@using BetterExpenses.Common.Models.User
+@using BetterExpenses.Web.Components.Settings
+@using BetterExpenses.Web.Services.Api
+@inject IJSRuntime JsRuntime;
+@inject NavigationManager NavManager
+@inject IAuthApiService AuthApiService
+@inject IUserApiService UserApiService
+
+<div class="container">
+    @if (_userSettingsValue == null)
+    {
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    }
+    else
+    {
+    <div class="row">
+        <div class="col-md-6 col-sm-12">
+            <BunqConnectionStatus Linked="_userSettingsValue.BunqLinked" OnButtonClick="ButtonClicked"/>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            @foreach (var account in _userMonetaryAccounts)
+            {
+                <MonetaryAccountSettings Account="account"/>
+            }
+        </div>
+    </div>
+    }
+</div>
+
+@code {
+    private UserSettingsDto? _userSettingsValue;
+    private List<UserMonetaryAccount>? _userMonetaryAccounts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var settingsTask = UserApiService.GetUserSettings();
+        var accountsTask = UserApiService.GetUserAccounts();
+        
+        await Task.WhenAll(settingsTask, accountsTask);
+        
+        _userSettingsValue = await settingsTask;
+        _userMonetaryAccounts = await accountsTask;
+    }
+
+    private async Task ButtonClicked()
+    {
+        if (_userSettingsValue!.BunqLinked)
+        {
+            await LinkBunq();
+        }
+        else
+        {
+            await UnlinkBunq();
+        }
+        
+    }
+
+    private async Task UnlinkBunq()
+    {
+        if (await AuthApiService.UnlinkBunq())
+        {
+            
+        }
+    }
+
+    private async Task LinkBunq()
+    {
+        var url = await AuthApiService.GetLinkBunqAuthUrl();
+        if (string.IsNullOrEmpty(url))
+        {
+            // TODO: Display error somewhere
+            return;
+        }
+        NavManager.NavigateTo(url);
+    }
+}
