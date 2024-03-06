@@ -20,40 +20,42 @@ public class UserMonetaryAccount
     public string AvatarImageUrl { get; set; } =
         "https://bunq-triage-model-storage-public.s3.eu-central-1.amazonaws.com/bunq_file/File/content/921ece497cd00f4e0cef3f0f63a962c31cf3f8e35311d127d5a7b23be3d074d5.png";
 
-    public static UserMonetaryAccount FromMonetaryAccount(MonetaryAccount ma, Guid userId)
+    public static UserMonetaryAccount FromMonetaryAccount(MonetaryAccount ma, Guid userId, string avatarUrl)
     {
         if (ma.MonetaryAccountBank != null)
         {
-            return FromMonetaryAccountBank(ma.MonetaryAccountBank, userId);
+            return FromMonetaryAccountBank(ma.MonetaryAccountBank, userId, avatarUrl);
         }
 
         if (ma.MonetaryAccountJoint != null)
         {
-            return FromMonetaryAccountJoint(ma.MonetaryAccountJoint, userId);
+            return FromMonetaryAccountJoint(ma.MonetaryAccountJoint, userId, avatarUrl);
         }
 
         throw new NotImplementedException("Type of account not implemented");
     }
 
-    private static UserMonetaryAccount FromMonetaryAccountBank(MonetaryAccountBank mab, Guid userId)
+    private static UserMonetaryAccount FromMonetaryAccountBank(MonetaryAccountBank mab, Guid userId, string avatarUrl)
     {
         return new UserMonetaryAccount
         {
             Id = mab.Id ?? throw new DataException($"The id of monetary account {mab.Description} is null"),
             Name = mab.Description,
             BetterExpensesUserId = userId,
-            JointAccount = false
+            JointAccount = false,
+            AvatarImageUrl = avatarUrl
         };
     }
     
-    private static UserMonetaryAccount FromMonetaryAccountJoint(MonetaryAccountJoint maj, Guid userId)
+    private static UserMonetaryAccount FromMonetaryAccountJoint(MonetaryAccountJoint maj, Guid userId, string avatarUrl)
     {
         return new UserMonetaryAccount
         {
             Id = maj.Id ?? throw new DataException($"The id of monetary account {maj.Description} is null"),
             Name = maj.Description,
             BetterExpensesUserId = userId,
-            JointAccount = true
+            JointAccount = true,
+            AvatarImageUrl = avatarUrl
         };
     }
 }

@@ -1,29 +1,19 @@
 ﻿namespace BetterExpenses.CalculatorWorker.Workers.Accounts;
 
 public class FetchAccountsWorker(ILogger<FetchAccountsWorker> logger, IServiceScopeFactory serviceScopeFactory)
-    : Worker(serviceScopeFactory)
+    : Worker<FetchAccountsWorker>(serviceScopeFactory, logger)
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private IFetchAccountsTaskRunner _fetchAccountsTaskRunner = null!;
+    
+    protected override string WorkerName => "Fetch accounts worker";
+    
+    protected override void InitServices()
     {
-        var fetchExpenseTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IFetchAccountsTaskRunner>();
-        logger.LogInformation("Fetch account worker is running");
-        
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                if (await fetchExpenseTaskRunner.RunCycle())
-                {
-                    continue;
-                }
-                logger.LogDebug("Nothing to process, waiting");
-                await Task.Delay(5000, stoppingToken);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Fetch accounts worker threw exception");
-                await Task.Delay(10000, stoppingToken);
-            }
-        }
+        _fetchAccountsTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IFetchAccountsTaskRunner>();
+    }
+
+    protected override async Task<bool> RunCycle()
+    {
+        return await _fetchAccountsTaskRunner.RunCycle();
     }
 }

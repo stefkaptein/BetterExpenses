@@ -2,37 +2,41 @@
 @using BetterExpenses.Common.DTO.User
 @using BetterExpenses.Common.Models.User
 @using BetterExpenses.Web.Components.Settings
+@using BetterExpenses.Web.Components
 @using BetterExpenses.Web.Services.Api
-@inject IJSRuntime JsRuntime;
 @inject NavigationManager NavManager
 @inject IAuthApiService AuthApiService
 @inject IUserApiService UserApiService
 
 <div class="container">
-    @if (_userSettingsValue == null)
-    {
-    <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-    }
-    else
-    {
     <div class="row">
         <div class="col-md-6 col-sm-12">
-            <BunqConnectionStatus Linked="_userSettingsValue.BunqLinked" OnButtonClick="ButtonClicked"/>
+            <div class="row mb-2">
+                <Loading Loaded="_userSettingsLoaded">
+                    <BunqConnectionStatus Linked="_userSettingsValue!.BunqLinked" OnButtonClick="ButtonClicked"/>
+                </Loading>
+            </div>
+            <div class="row mb-2">
+                <UserTaskButtons/>
+            </div>
         </div>
         <div class="col-md-6 col-sm-12">
-            @foreach (var account in _userMonetaryAccounts)
-            {
-                <MonetaryAccountSettings Account="account"/>
-            }
+            <div class="row mb-2">
+                <Loading Loaded="_userMonetaryAccountsLoaded">
+                    @foreach (var account in _userMonetaryAccounts!)
+                    {
+                        <MonetaryAccountSettings Account="account"/>
+                    }
+                </Loading>
+            </div>
         </div>
     </div>
-    }
 </div>
 
 @code {
+    private bool _userSettingsLoaded;
     private UserSettingsDto? _userSettingsValue;
+    private bool _userMonetaryAccountsLoaded;
     private List<UserMonetaryAccount>? _userMonetaryAccounts;
 
     protected override async Task OnInitializedAsync()
@@ -44,12 +48,14 @@
         await Task.WhenAll(settingsTask, accountsTask);
         
         _userSettingsValue = await settingsTask;
+        _userSettingsLoaded = true;
         _userMonetaryAccounts = await accountsTask;
+        _userMonetaryAccountsLoaded = true;
     }
 
     private async Task ButtonClicked()
     {
-        if (_userSettingsValue!.BunqLinked)
+        if (!_userSettingsValue!.BunqLinked)
         {
             await LinkBunq();
         }
@@ -62,9 +68,9 @@
 
     private async Task UnlinkBunq()
     {
-        if (await AuthApiService.UnlinkBunq())
+        if (!await AuthApiService.UnlinkBunq())
         {
-            
+            // TODO: Display error somewhere
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using BetterExpenses.Common.Database.Mongo;
+﻿using System.Linq.Expressions;
+using BetterExpenses.Common.Database.Mongo;
 using BetterExpenses.Common.Models.Expenses;
 using MongoDB.Driver;
 // ReSharper disable PossibleMultipleEnumeration
@@ -8,6 +9,8 @@ namespace BetterExpenses.Common.Services.Expenses;
 public interface IExpensesMongoService
 {
     public Task InsertMany(IEnumerable<UserAccountExpensesList> toAdd);
+    public Task<UserAccountExpensesList?> FindFirst(Expression<Func<UserAccountExpensesList, bool>> filter);
+    public Task BulkWrite(IEnumerable<WriteModel<UserAccountExpensesList>> writeModels);
 }
 
 public class ExpensesMongoService(IMongoConnection mongoConnection) : IExpensesMongoService
@@ -22,5 +25,18 @@ public class ExpensesMongoService(IMongoConnection mongoConnection) : IExpensesM
             return;
         }
         await _userExpensesCollection.InsertManyAsync(toAdd);
+    }
+
+    public async Task<UserAccountExpensesList?> FindFirst(Expression<Func<UserAccountExpensesList, bool>> filter)
+    {
+        return await _userExpensesCollection.Find(filter).FirstOrDefaultAsync();
+    }
+
+    public async Task BulkWrite(IEnumerable<WriteModel<UserAccountExpensesList>> writeModels)
+    {
+        if (writeModels.Any())
+        {
+            await _userExpensesCollection.BulkWriteAsync(writeModels);
+        }
     }
 }

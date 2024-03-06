@@ -1,4 +1,5 @@
 ﻿using BetterExpenses.API.Services.Auth;
+using BetterExpenses.API.Services.Graph;
 using BetterExpenses.API.Services.Options;
 
 namespace BetterExpenses.API.Services;
@@ -16,6 +17,7 @@ public static class ConfigureServicesExtensions
     public static IServiceCollection ConfigureServices(this IServiceCollection services)
     {
         services.AddSingleton<IBunqAuthService, BunqAuthService>();
+        services.AddSingleton<IGraphService, GraphService>();
         
         return services;
     }

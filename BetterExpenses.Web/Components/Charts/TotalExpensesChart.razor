@@ -1,0 +1,46 @@
+﻿@using BetterExpenses.Web.Services.Api
+@inject IGraphApiService GraphApiService
+
+<LineChart @ref="_lineChart" Class="mb-4" />
+
+@code {
+    private LineChart _lineChart = default!;
+    private ChartData _chartData = default!;
+    private readonly LineChartOptions _lineChartOptions = new ()
+    {
+        Responsive = true,
+        MaintainAspectRatio = true,
+        Interaction = new Interaction { Mode = InteractionMode.Index }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var chart = await GraphApiService.GetTotalExpensesChart(2024, 2);
+
+        var dataSets = chart.DataDictionary.Select(x => new LineChartDataset
+        {
+            Label = x.Key,
+            Data = x.Value
+        });
+        
+        _chartData = new ChartData
+        {
+            Labels = chart.Labels,
+            Datasets = new List<IChartDataset>(dataSets)
+        };
+
+        
+        _lineChartOptions.Scales.X.Title.Text = "Day";
+        _lineChartOptions.Scales.X.Title.Display = true;
+        
+        _lineChartOptions.Scales.Y.Title.Text = "Amount";
+        _lineChartOptions.Scales.Y.Title.Display = true;
+        
+        await _lineChart.InitializeAsync(_chartData, _lineChartOptions);
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

@@ -4,7 +4,9 @@ using BetterExpenses.Common.Database;
 using BetterExpenses.Common.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

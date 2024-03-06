@@ -1,18 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Components
 <div>
-    <div class="card">
-        <div class="row g-0">
+    <div class="card d-inline-block">
+        <div class="row g-1 justify-content-evenly">
             <div class="col-3">
                 <img src="images/icons/banks/bunq-logo-rounded.png" class="img-fluid p-2" alt="bunq_logo">
             </div>
-            <div class="col-1 d-flex align-items-center">
+            <div class="col-auto d-flex align-items-center">
                 <span class="material-symbols-outlined md-48 @ColorClass">@IconType</span>
             </div>
-            <div class="col-5 d-flex align-items-center">
-                <div class="card-body">
-                    <p class="card-text">@CardText</p>
-                    <button class="btn btn-outline-success" @onclick="OnButtonClick">@ButtonText</button>
-                </div>
+            <div class="col-auto d-flex align-items-center">
+                <button class="btn btn-outline-@ButtonColorClass" @onclick="OnButtonClick">@ButtonText</button>
             </div>
         </div>
     </div>
@@ -26,7 +23,7 @@
     public EventCallback OnButtonClick { get; set; }
     
     private string ColorClass => Linked ? "success" : "danger";
+    private string ButtonColorClass => !Linked ? "success" : "danger";
     private string IconType => Linked ? "link" : "link_off";
-    private string CardText => $"Bunq is {(Linked ? "" : "not")} connected";
     private string ButtonText => Linked ? "Disconnect" : "Connect";
 }

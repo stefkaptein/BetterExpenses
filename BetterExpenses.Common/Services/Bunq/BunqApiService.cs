@@ -80,6 +80,65 @@ public abstract class BunqApiService(IApiContextService contextService) : BunqMo
 
         return resultList;
     }
+
+    protected static List<T> GetPaginationInFuture<T>(string url, ApiClient apiClient, bool wrap, int newestId,
+        int pageSize = 10)
+    {
+        var pagination = new Pagination { Count = pageSize, NewerId = newestId };
+        var uriParams = pagination.UrlParamsNextPage;
+        List<T> resultList = [];
+        while (true)
+        {
+            var rawResponse = apiClient.Get(url, uriParams, EmptyParameters);
+            var response = wrap ? FromJsonList<T>(rawResponse, typeof(T).Name) : FromJsonList<T>(rawResponse);
+            resultList.AddRange(response.Value);
+            
+            if (!response.Pagination.HasNextPageAssured())
+            {
+                break;
+            }
+
+            uriParams = response.Pagination.UrlParamsNextPage;
+        }
+
+        return resultList;
+    }
+
+    protected static List<T> GetPaginationPrevious<T>(string url, ApiClient apiClient, bool wrap, int oldestId,
+        Func<T, bool>? finishCondition = null, int pageSize = 10)
+    {
+        var pagination = new Pagination { Count = pageSize, OlderId = oldestId };
+        var uriParams = pagination.UrlParamsPreviousPage;
+        List<T> resultList = [];
+        while (true)
+        {
+            var rawResponse = apiClient.Get(url, uriParams, EmptyParameters);
+            var response = wrap ? FromJsonList<T>(rawResponse, typeof(T).Name) : FromJsonList<T>(rawResponse);
+            if (finishCondition != null)
+            {
+                foreach (var item in response.Value)
+                {
+                    resultList.Add(item);
+                    if (!finishCondition(item)) continue;
+                    
+                    return resultList;
+                }
+            }
+            else
+            {
+                resultList.AddRange(response.Value);
+            }
+            
+            if (!response.Pagination.HasPreviousPage())
+            {
+                break;
+            }
+
+            uriParams = response.Pagination.UrlParamsPreviousPage;
+        }
+
+        return resultList;
+    }
     
     public override bool IsAllFieldNull()
     {

@@ -1,0 +1,56 @@
+﻿@using BetterExpenses.Web.Services.Api
+@inject IUserTaskApiService UserTaskApiService
+@inject ToastService ToastService
+
+<div class="col-auto">
+    <button type="button" class="btn btn-outline-info" @onclick="FetchAccounts">Fetch Accounts</button>
+</div>
+<div class="col-auto">
+    <button type="button" class="btn btn-outline-info" @onclick="FetchExpenses">Fetch Expenses</button>
+</div>
+<div class="col-auto">
+    <button type="button" class="btn btn-outline-info" @onclick="ProcessExpenses">Process Expenses</button>
+</div>
+
+@code {
+
+    private async Task FetchAccounts()
+    {
+        try
+        {
+            await UserTaskApiService.FetchAccounts();
+            ToastService.Notify(new ToastMessage(ToastType.Success, IconName.Check, "Success", "Fetch accounts task has been scheduled"));
+        }
+        catch (Exception e)
+        {
+            ToastService.Notify(new ToastMessage(ToastType.Danger, IconName.EmojiNeutralFill, "Error", "Failed to fetch accounts, try again later"));
+        }
+    }
+    
+    private async Task FetchExpenses()
+    {
+        try
+        {
+            await UserTaskApiService.FetchExpenses();
+            ToastService.Notify(new ToastMessage(ToastType.Success, IconName.Check, "Success", "Fetch expenses task has been scheduled"));
+        }
+        catch (Exception e)
+        {
+            ToastService.Notify(new ToastMessage(ToastType.Danger, IconName.EmojiNeutralFill, "Error", "Failed to fetch expenses, try again later"));
+        }
+    }
+    
+    private async Task ProcessExpenses()
+    {
+        try
+        {
+            await UserTaskApiService.ProcessExpenses();
+            ToastService.Notify(new ToastMessage(ToastType.Success, IconName.Check, "Success", "Process expenses task has been scheduled"));
+        }
+        catch (Exception e)
+        {
+            ToastService.Notify(new ToastMessage(ToastType.Danger, IconName.EmojiNeutralFill, "Error", "Failed to process expenses, try again later"));
+        }
+    }
+
+}

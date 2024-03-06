@@ -39,7 +39,7 @@ public class UserExpense
     /// The Amount transferred by the Payment. Will be negative for outgoing Payments and positive for incoming
     /// Payments (relative to the MonetaryAccount indicated by monetary_account_id).
     /// </summary>
-    public required Amount Amount { get; set; }
+    public required double Amount { get; set; }
     
     /// <summary>
     /// The LabelMonetaryAccount containing the public information of the other (counterparty) side of the Payment.

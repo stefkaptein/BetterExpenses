@@ -1,8 +1,6 @@
 ﻿@page "/auth/linkBunq/callback"
 @using Microsoft.AspNetCore.WebUtilities
 @using BetterExpenses.Web.Services.Api
-@using BetterExpenses.Web.Services.StateProviders
-@inject JSRuntime JsRuntime
 @inject NavigationManager NavManager
 @inject IAuthApiService AuthApiService
 
@@ -46,7 +44,7 @@
         
         if(!queryStrings.TryGetValue("code", out var code) || !queryStrings.TryGetValue("state", out var state) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
         {
-            await JsRuntime.InvokeAsync<object>("close");
+            NavManager.NavigateTo("/");
             return;
         }
 
@@ -55,6 +53,6 @@
         StateHasChanged();
         
         await Task.Delay(TimeSpan.FromSeconds(3));
-        await JsRuntime.InvokeAsync<object>("close");
+        NavManager.NavigateTo("/Auth/UserSettings");
     }
 }

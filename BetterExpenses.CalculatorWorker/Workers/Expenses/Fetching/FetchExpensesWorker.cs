@@ -1,29 +1,19 @@
 ﻿namespace BetterExpenses.CalculatorWorker.Workers.Expenses.Fetching;
 
 public class FetchExpensesWorker(ILogger<FetchExpensesWorker> logger, IServiceScopeFactory serviceScopeFactory)
-    : Worker(serviceScopeFactory)
+    : Worker<FetchExpensesWorker>(serviceScopeFactory, logger)
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private IFetchExpensesTaskRunner _fetchExpensesTaskRunner = null!;
+    
+    protected override string WorkerName => "Fetch expenses worker";
+
+    protected override void InitServices()
     {
-        var fetchExpenseTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IFetchExpensesTaskRunner>();
-        logger.LogInformation("Fetch expenses worker is running");
-        
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                if (await fetchExpenseTaskRunner.RunCycle())
-                {
-                    continue;
-                }
-                logger.LogDebug("Nothing to process, waiting");
-                await Task.Delay(5000, stoppingToken);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Fetch expenses worker threw exception");
-                await Task.Delay(10000, stoppingToken);
-            }
-        }
+        _fetchExpensesTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IFetchExpensesTaskRunner>();
+    }
+
+    protected override async Task<bool> RunCycle()
+    {
+        return await _fetchExpensesTaskRunner.RunCycle();
     }
 }

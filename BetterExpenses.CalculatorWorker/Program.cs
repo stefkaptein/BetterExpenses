@@ -1,20 +1,32 @@
-using BetterExpenses.CalculatorWorker.Workers;
-using BetterExpenses.CalculatorWorker.Workers.Accounts;
-using BetterExpenses.CalculatorWorker.Workers.Expenses.Fetching;
-using BetterExpenses.Common.Database;
-using BetterExpenses.Common.Services;
+using System.Diagnostics;
+using BetterExpenses.CalculatorWorker;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using NLog;
+using NLog.Extensions.Logging;
 
-var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<FetchAccountsWorker>();
-builder.Services.AddHostedService<FetchExpensesWorker>();
+var logger = LogManager.GetCurrentClassLogger();
+try
+{
+    logger.Debug("init main");
 
-builder.Services.BindCommonConfiguration(builder.Configuration);
+    var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.ConfigureCommonServices();
-builder.Services.AddWorkerServices();
+    builder.Logging.ClearProviders();
+    builder.Logging.AddNLog();
 
-builder.Services.ConfigurePostgres(builder.Configuration);
-builder.Services.ConfigureMongo(builder.Configuration);
+    builder.Services.ConfigureServices(builder.Configuration);
 
-var host = builder.Build();
-host.Run();
+    var host = builder.Build();
+    host.Run();
+}
+catch (Exception e)
+{
+    logger.Fatal(e, "Application failed to startup; {Message}", e.Message);
+    Debugger.Break();
+}
+finally
+{
+    LogManager.Flush();
+}

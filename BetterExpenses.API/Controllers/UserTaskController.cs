@@ -37,4 +37,18 @@ public class UserTaskController(ICalculatorTaskService calculatorTaskService) : 
         await _calculatorTaskService.AddTask(task);
         return Ok();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> ProcessExpenses()
+    {
+        var user = await GetUser();
+
+        var task = new ProcessExpensesTask
+        {
+            UserId = user.Id
+        };
+        
+        await _calculatorTaskService.AddTask(task);
+        return Ok();
+    }
 }

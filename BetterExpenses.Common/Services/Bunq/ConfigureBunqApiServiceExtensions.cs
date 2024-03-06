@@ -8,6 +8,7 @@ public static class ConfigureBunqApiServiceExtensions
     {
         services.AddScoped<IBunqExpensesService, BunqExpensesService>();
         services.AddScoped<IBunqMonetaryAccountService, BunqMonetaryAccountService>();
+        services.AddScoped<IBunqPublicAttachmentApiService, BunqPublicAttachmentApiService>();
         return services;
     }
 }

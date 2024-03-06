@@ -1,0 +1,18 @@
+﻿@if (!Loaded)
+{
+    <div class="d-flex justify-content-center">
+        <Spinner Type="SpinnerType.Dots" Size="SpinnerSize.ExtraLarge"/>
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter]
+    public bool Loaded { get; set; }
+}

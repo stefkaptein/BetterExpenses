@@ -1,5 +1,6 @@
 ﻿using BetterExpenses.Common.Options;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BetterExpenses.Common.Database.Mongo;

@@ -12,6 +12,7 @@ public class SqlDbContext : IdentityDbContext<BetterExpensesUser, IdentityRole<G
     public DbSet<UserSettings> UserOptions { get; set; }
     public DbSet<FetchAccountsTask> FetchAccountsTasks { get; set; }
     public DbSet<FetchExpensesTask> FetchExpensesTasks { get; set; }
+    public DbSet<ProcessExpensesTask> ProcessExpensesTasks { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     public SqlDbContext(DbContextOptions<SqlDbContext> options) : base(options)

@@ -46,7 +46,7 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
     {
         var accountIds = accountsAnalyseStatus.Keys.ToList();
         var monetaryAccountsFromDb = await _monetaryAccountsDbSet
-            .Where(x => accountIds.Contains(x.Id))
+            .Where(x => x.BetterExpensesUserId == userId && accountIds.Contains(x.Id))
             .ToListAsync();
 
         foreach (var account in monetaryAccountsFromDb)

@@ -1,30 +1,19 @@
 ﻿namespace BetterExpenses.CalculatorWorker.Workers.Expenses.Processing;
 
 public class ProcessExpensesWorker(ILogger<ProcessExpensesWorker> logger, IServiceScopeFactory serviceScopeFactory)
-    : Worker(serviceScopeFactory)
+    : Worker<ProcessExpensesWorker>(serviceScopeFactory, logger)
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private IProcessExpensesTaskRunner _fetchExpensesTaskRunner = null!;
+
+    protected override string WorkerName => "Process expenses worker";
+
+    protected override void InitServices()
     {
-        var fetchExpenseTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IProcessExpensesTaskRunner>();
-        logger.LogInformation("Process expenses worker is running");
+        _fetchExpensesTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IProcessExpensesTaskRunner>();
+    }
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                if (await fetchExpenseTaskRunner.RunCycle())
-                {
-                    continue;
-                }
-
-                logger.LogDebug("Nothing to process, waiting");
-                await Task.Delay(5000, stoppingToken);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Process expenses worker threw exception");
-                await Task.Delay(10000, stoppingToken);
-            }
-        }
+    protected override async Task<bool> RunCycle()
+    {
+        return await _fetchExpensesTaskRunner.RunCycle();
     }
 }

@@ -21,6 +21,7 @@ builder.Services.AddScoped(sp =>
     });
 
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Auth"));
+builder.Services.AddBlazorBootstrap();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
@@ -29,6 +30,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStatePr
 
 builder.Services.AddScoped<IAuthApiService, AuthApiApiService>();
 builder.Services.AddScoped<IUserApiService, UserApiService>();
+builder.Services.AddScoped<IUserTaskApiService, UserTaskApiService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IGraphApiService, GraphApiService>();
 
 await builder.Build().RunAsync();
