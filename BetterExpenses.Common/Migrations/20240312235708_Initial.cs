@@ -41,6 +41,19 @@ namespace BetterExpenses.Common.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProcessExpensesTasks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProcessExpensesTasks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -108,7 +121,8 @@ namespace BetterExpenses.Common.Migrations
                     BetterExpensesUserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     JointAccount = table.Column<bool>(type: "boolean", nullable: false),
-                    AnalyseExpenses = table.Column<bool>(type: "boolean", nullable: false)
+                    AnalyseExpenses = table.Column<bool>(type: "boolean", nullable: false),
+                    AvatarImageUrl = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -187,7 +201,7 @@ namespace BetterExpenses.Common.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FetchPaymentsFrom = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    FetchPaymentsTill = table.Column<TimeSpan>(type: "interval", nullable: false),
                     BunqLinked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -271,6 +285,16 @@ namespace BetterExpenses.Common.Migrations
                 column: "BetterExpensesUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProcessExpensesTasks_CreationDate",
+                table: "ProcessExpensesTasks",
+                column: "CreationDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcessExpensesTasks_Id",
+                table: "ProcessExpensesTasks",
+                column: "Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
                 column: "UserId");
@@ -324,6 +348,9 @@ namespace BetterExpenses.Common.Migrations
 
             migrationBuilder.DropTable(
                 name: "MonetaryAccounts");
+
+            migrationBuilder.DropTable(
+                name: "ProcessExpensesTasks");
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");

@@ -8,5 +8,5 @@ public class BetterExpensesUser : IdentityUser<Guid>
     
     public List<UserMonetaryAccount> Accounts { get; set; } = [];
     
-    public UserSettings UserSettings { get; set; } = new();
+    public UserSettings UserSettings { get; set; }
 }

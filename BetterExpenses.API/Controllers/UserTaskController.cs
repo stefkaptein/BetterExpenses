@@ -1,12 +1,14 @@
 ﻿using BetterExpenses.Common.Models.Tasks;
 using BetterExpenses.Common.Services.Tasks;
+using BetterExpenses.Common.Services.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BetterExpenses.API.Controllers;
 
-public class UserTaskController(ICalculatorTaskService calculatorTaskService) : AuthorizedApiControllerBase
+public class UserTaskController(ICalculatorTaskService calculatorTaskService, IUserOptionsService userOptionsService) : AuthorizedApiControllerBase
 {
     private readonly ICalculatorTaskService _calculatorTaskService = calculatorTaskService;
+    private readonly IUserOptionsService _userOptionsService = userOptionsService;
 
     [HttpGet]
     public async Task<IActionResult> FetchMonetaryAccounts()
@@ -27,11 +29,12 @@ public class UserTaskController(ICalculatorTaskService calculatorTaskService) : 
     public async Task<IActionResult> FetchExpenses()
     {
         var user = await GetUser();
+        var fetchTill = await _userOptionsService.GetFetchPaymentsTillForUser(user.Id);
 
         var task = new FetchExpensesTask
         {
             UserId = user.Id,
-            FetchTill = DateTime.Today.Subtract(user.UserSettings.FetchPaymentsFrom).ToUniversalTime()
+            FetchTill = fetchTill
         };
         
         await _calculatorTaskService.AddTask(task);

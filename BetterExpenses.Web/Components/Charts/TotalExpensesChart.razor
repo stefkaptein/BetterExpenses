@@ -1,9 +1,18 @@
 ﻿@using BetterExpenses.Web.Services.Api
 @inject IGraphApiService GraphApiService
 
-<LineChart @ref="_lineChart" Class="mb-4" />
+@if (_hasData)
+{
+    <LineChart @ref="_lineChart" Class="mb-4" />
+}
+else
+{
+    <p>No data available at this moment</p>
+}
+
 
 @code {
+    private bool _hasData = true;
     private LineChart _lineChart = default!;
     private ChartData _chartData = default!;
     private readonly LineChartOptions _lineChartOptions = new ()
@@ -16,7 +25,12 @@
     protected override async Task OnInitializedAsync()
     {
         var chart = await GraphApiService.GetTotalExpensesChart(2024, 2);
-
+        if (chart == null)
+        {
+            _hasData = false;
+            return;
+        }
+        
         var dataSets = chart.DataDictionary.Select(x => new LineChartDataset
         {
             Label = x.Key,

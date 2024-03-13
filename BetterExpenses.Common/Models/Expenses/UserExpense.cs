@@ -1,5 +1,7 @@
 ﻿using Bunq.Sdk.Model.Core;
+using Bunq.Sdk.Model.Generated.Endpoint;
 using Bunq.Sdk.Model.Generated.Object;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace BetterExpenses.Common.Models.Expenses;
 
@@ -8,7 +10,14 @@ public class UserExpense
     /// <summary>
     /// The id of the created Payment.
     /// </summary>
+    [BsonId, BsonElement("_id")]
     public int Id { get; set; }
+    
+    /// <summary>
+    /// The id of the MonetaryAccount the Payment was made to or from (depending on whether this is an incoming or
+    /// outgoing Payment).
+    /// </summary>
+    public int MonetaryAccountId { get; set; }
     
     /// <summary>
     /// The timestamp when the Payment was done. (In utc format)

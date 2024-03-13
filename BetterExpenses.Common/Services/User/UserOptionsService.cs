@@ -8,7 +8,9 @@ namespace BetterExpenses.Common.Services.User;
 
 public interface IUserOptionsService
 {
+    public Task CreateDefaultUserSettings(Guid userId);
     public Task<UserSettings?> GetOptionsForUser(Guid userId);
+    public Task<DateTime> GetFetchPaymentsTillForUser(Guid userId);
     public Task UpdateUserOptions(Guid userId, Action<UserSettings> settingsUpdates);
     public Task SetBunqLinked(Guid userId, bool value);
 }
@@ -18,11 +20,28 @@ public class UserOptionsService(SqlDbContext dbContext, IMapper mapper) : IUserO
     private readonly SqlDbContext _dbContext = dbContext;
     private readonly DbSet<UserSettings> _userOptionsSet = dbContext.UserOptions;
 
+    public async Task CreateDefaultUserSettings(Guid userId)
+    {
+        var newUserDefaultOptions = new UserSettings
+        {
+            Id = userId
+        };
+        _userOptionsSet.Add(newUserDefaultOptions);
+        await _dbContext.SaveChangesAsync();
+    }
+    
     public async Task<UserSettings?> GetOptionsForUser(Guid userId)
     {
         return await _userOptionsSet
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == userId);
+    }
+
+    public async Task<DateTime> GetFetchPaymentsTillForUser(Guid userId)
+    {
+        var options = await GetOptionsForUser(userId) 
+                      ?? throw new IdNotFoundInDatabase($"User options not found for user {userId}");
+        return DateTime.UtcNow.Subtract(options.FetchPaymentsTill);
     }
 
     public async Task UpdateUserOptions(Guid userId, Action<UserSettings> settingsUpdates)

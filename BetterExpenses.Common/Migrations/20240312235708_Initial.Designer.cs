@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BetterExpenses.Common.Migrations
 {
     [DbContext(typeof(SqlDbContext))]
-    [Migration("20240228025152_Initial")]
+    [Migration("20240312235708_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -71,6 +71,27 @@ namespace BetterExpenses.Common.Migrations
                     b.HasIndex("Id");
 
                     b.ToTable("FetchExpensesTasks");
+                });
+
+            modelBuilder.Entity("BetterExpenses.Common.Models.Tasks.ProcessExpensesTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreationDate");
+
+                    b.HasIndex("Id");
+
+                    b.ToTable("ProcessExpensesTasks");
                 });
 
             modelBuilder.Entity("BetterExpenses.Common.Models.User.BetterExpensesUser", b =>
@@ -170,6 +191,10 @@ namespace BetterExpenses.Common.Migrations
                     b.Property<bool>("AnalyseExpenses")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("AvatarImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("JointAccount")
                         .HasColumnType("boolean");
 
@@ -192,7 +217,7 @@ namespace BetterExpenses.Common.Migrations
                     b.Property<bool>("BunqLinked")
                         .HasColumnType("boolean");
 
-                    b.Property<TimeSpan>("FetchPaymentsFrom")
+                    b.Property<TimeSpan>("FetchPaymentsTill")
                         .HasColumnType("interval");
 
                     b.HasKey("Id");

@@ -3,5 +3,5 @@
 public class UserSettingsDto
 {
     public bool BunqLinked { get; set; }
-    public TimeSpan FetchPaymentsFrom { get; set; }
+    public TimeSpan FetchPaymentsTill { get; set; }
 }

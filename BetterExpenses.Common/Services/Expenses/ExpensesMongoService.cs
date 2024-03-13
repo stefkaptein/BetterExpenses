@@ -8,17 +8,17 @@ namespace BetterExpenses.Common.Services.Expenses;
 
 public interface IExpensesMongoService
 {
-    public Task InsertMany(IEnumerable<UserAccountExpensesList> toAdd);
-    public Task<UserAccountExpensesList?> FindFirst(Expression<Func<UserAccountExpensesList, bool>> filter);
-    public Task BulkWrite(IEnumerable<WriteModel<UserAccountExpensesList>> writeModels);
+    public Task InsertMany(IEnumerable<UserExpense> toAdd);
+    public Task BulkWrite(IEnumerable<WriteModel<UserExpense>> writeModels);
+    public Task<List<UserExpense>> GetExpensesForAccount(int accountId);
 }
 
 public class ExpensesMongoService(IMongoConnection mongoConnection) : IExpensesMongoService
 {
-    private readonly IMongoCollection<UserAccountExpensesList> _userExpensesCollection =
-        mongoConnection.GetCollection<UserAccountExpensesList>(MongoConnection.ExpensesCollectionName);
+    private readonly IMongoCollection<UserExpense> _userExpensesCollection =
+        mongoConnection.GetCollection<UserExpense>(MongoConnection.ExpensesCollectionName);
 
-    public async Task InsertMany(IEnumerable<UserAccountExpensesList> toAdd)
+    public async Task InsertMany(IEnumerable<UserExpense> toAdd)
     {
         if (!toAdd.Any())
         {
@@ -27,16 +27,19 @@ public class ExpensesMongoService(IMongoConnection mongoConnection) : IExpensesM
         await _userExpensesCollection.InsertManyAsync(toAdd);
     }
 
-    public async Task<UserAccountExpensesList?> FindFirst(Expression<Func<UserAccountExpensesList, bool>> filter)
-    {
-        return await _userExpensesCollection.Find(filter).FirstOrDefaultAsync();
-    }
-
-    public async Task BulkWrite(IEnumerable<WriteModel<UserAccountExpensesList>> writeModels)
+    public async Task BulkWrite(IEnumerable<WriteModel<UserExpense>> writeModels)
     {
         if (writeModels.Any())
         {
             await _userExpensesCollection.BulkWriteAsync(writeModels);
         }
+    }
+
+    public async Task<List<UserExpense>> GetExpensesForAccount(int accountId)
+    {
+        return await _userExpensesCollection
+            .Find(x => x.MonetaryAccountId == accountId)
+            .Sort(Builders<UserExpense>.Sort.Descending(x => x.Id))
+            .ToListAsync();
     }
 }

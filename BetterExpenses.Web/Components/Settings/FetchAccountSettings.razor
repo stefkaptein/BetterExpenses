@@ -1,0 +1,54 @@
+﻿@using BetterExpenses.Common.Models.User
+@using BetterExpenses.Web.Services.Api
+@using System.Diagnostics
+@using BetterExpenses.Common.DTO.User
+@using BetterExpenses.Common.Extensions
+@using BetterExpenses.Web.Models.Toasts.Settings
+@inject IUserApiService UserApiService
+@inject ToastService ToastService
+
+
+<div class="mb-3">
+    <DateInput TValue="DateOnly" 
+               Value="@_fetchExpensesFrom" 
+               ValueExpression="() => _fetchExpensesFrom" 
+               ValueChanged="ValueChanged" 
+               Max="DateOnly.FromDateTime(DateTime.UtcNow)"
+               Placeholder="Enter Date"/>
+</div>
+
+@if (UserMonetaryAccounts != null)
+{
+    @foreach (var account in UserMonetaryAccounts!)
+    {
+        <MonetaryAccountSettings Account="account"/>
+    }
+}
+
+@code {
+    [Parameter] public List<UserMonetaryAccount>? UserMonetaryAccounts { get; set; }
+
+    [Parameter] public UserSettingsDto? UserSettingsDto { get; set; }
+
+    private bool _dateLoaded = false;
+    private DateOnly _fetchExpensesFrom = DateTime.UtcNow.Subtract(UserSettings.DefaultFetchPaymentsFrom).ToDateOnly();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        var fetchExpensesFromSpan = UserSettingsDto?.FetchPaymentsTill ?? UserSettings.DefaultFetchPaymentsFrom;
+        _fetchExpensesFrom = DateTime.UtcNow.Subtract(fetchExpensesFromSpan).ToDateOnly();
+        _dateLoaded = true;
+    }
+
+    private async Task ValueChanged(DateOnly newDate)
+    {
+        if (_fetchExpensesFrom != newDate)
+        {
+            _fetchExpensesFrom = newDate;
+            await UserApiService.UpdateFetchExpensesFrom(newDate);
+            ToastService.Notify(UserSettingsToasts.SettingsSavedToast);
+        }
+    }
+
+}

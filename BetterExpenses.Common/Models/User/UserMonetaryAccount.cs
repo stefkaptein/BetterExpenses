@@ -20,6 +20,10 @@ public class UserMonetaryAccount
     public string AvatarImageUrl { get; set; } =
         "https://bunq-triage-model-storage-public.s3.eu-central-1.amazonaws.com/bunq_file/File/content/921ece497cd00f4e0cef3f0f63a962c31cf3f8e35311d127d5a7b23be3d074d5.png";
 
+    public DateTime FetchedTill { get; set; }
+
+    public DateTime LastFetched { get; set; }
+
     public static UserMonetaryAccount FromMonetaryAccount(MonetaryAccount ma, Guid userId, string avatarUrl)
     {
         if (ma.MonetaryAccountBank != null)

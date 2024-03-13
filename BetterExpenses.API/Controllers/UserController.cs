@@ -4,6 +4,7 @@ using BetterExpenses.Common.Services.MonetaryAccounts;
 using BetterExpenses.Common.Services.Tasks;
 using BetterExpenses.Common.Services.User;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver.Linq;
 
 namespace BetterExpenses.API.Controllers;
 
@@ -45,17 +46,30 @@ public class UserController(
     public async Task<IActionResult> UpdateAnalyseAccount(int accountId, bool analyse)
     {
         var user = await GetUser();
+        
         await _monetaryAccountService.SetAccountsToAnalyse(user.Id,
             new Dictionary<int, bool> { { accountId, analyse } });
-
+        var fetchTill = await _userOptionsService.GetFetchPaymentsTillForUser(user.Id);
+        
         var task = new FetchExpensesTask
         {
             UserId = user.Id,
-            FetchTill = DateTime.Today.Subtract(user.UserSettings.FetchPaymentsFrom).ToUniversalTime()
+            FetchTill = fetchTill
         };
 
         await _calculatorTaskService.AddTask(task);
 
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateFetchExpensesFromDate(DateTime fromDate)
+    {
+        var user = await GetUser();
+
+        var fetchFromSpan = DateTime.UtcNow.Subtract(fromDate);
+
+        await _userOptionsService.UpdateUserOptions(user.Id, x => x.FetchPaymentsTill = fetchFromSpan); 
         return Ok();
     }
 }

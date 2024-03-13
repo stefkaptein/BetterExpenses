@@ -7,10 +7,11 @@ namespace BetterExpenses.Common.Services.MonetaryAccounts;
 public interface IMonetaryAccountService
 {
     public Task ReplaceMonetaryAccountsForUser(Guid userId, IEnumerable<UserMonetaryAccount> newList);
-    public Task<List<int>> GetAccountIdsToAnalyse(Guid userId);
+    public Task<IEnumerable<int>> GetAccountIdsToAnalyse(Guid userId);
     public Task<List<UserMonetaryAccount>> GetAccountsToAnalyse(Guid userId);
     public Task SetAccountsToAnalyse(Guid userId, Dictionary<int, bool> accountsAnalyseStatus);
     public Task<List<UserMonetaryAccount>> GetAccounts(Guid userId);
+    public Task UpdateFetchedTill(Dictionary<int, DateTime> accountFetchedTillDict);
 }
 
 public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountService
@@ -30,9 +31,9 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<int>> GetAccountIdsToAnalyse(Guid userId)
+    public async Task<IEnumerable<int>> GetAccountIdsToAnalyse(Guid userId)
     {
-        return (await GetAccountsToAnalyse(userId)).Select(x => x.Id).ToList();
+        return (await GetAccountsToAnalyse(userId)).Select(x => x.Id);
     }
 
     public async Task<List<UserMonetaryAccount>> GetAccountsToAnalyse(Guid userId)
@@ -61,6 +62,19 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
     {
         return await _monetaryAccountsDbSet
             .Where(x => x.BetterExpensesUserId == userId)
+            .OrderBy(x => x.Id)
             .ToListAsync();
+    }
+
+    public async Task UpdateFetchedTill(Dictionary<int, DateTime> accountFetchedTillDict)
+    {
+        var accountIds = accountFetchedTillDict.Keys.ToList();
+        var accountsFromDb = await _monetaryAccountsDbSet.Where(x => accountIds.Contains(x.Id)).ToListAsync();
+        foreach (var accountFromDb in accountsFromDb)
+        {
+            accountFromDb.FetchedTill = accountFetchedTillDict[accountFromDb.Id];
+        }
+        
+        await dbContext.SaveChangesAsync();
     }
 }

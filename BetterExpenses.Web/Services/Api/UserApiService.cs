@@ -9,6 +9,7 @@ public interface IUserApiService
     public Task<UserSettingsDto> GetUserSettings();
     public Task<List<UserMonetaryAccount>> GetUserAccounts();
     public Task UpdateAnalyseAccount(int accountId, bool analyse);
+    public Task UpdateFetchExpensesFrom(DateOnly from);
 }
 
 public class UserApiService(HttpClient httpClient) : ApiService(httpClient), IUserApiService
@@ -16,6 +17,7 @@ public class UserApiService(HttpClient httpClient) : ApiService(httpClient), IUs
     private const string GetUserSettingsPath = "api/User/Settings";
     private const string GetMonetaryAccountsPath = "api/User/MonetaryAccounts";
     private const string UpdateMonetaryAnalyseAccountPath = "api/User/UpdateAnalyseAccount";
+    private const string UpdateFetchExpensesFromDatePath = "api/User/UpdateFetchExpensesFromDate";
     
     public async Task<UserSettingsDto> GetUserSettings()
     {
@@ -35,5 +37,13 @@ public class UserApiService(HttpClient httpClient) : ApiService(httpClient), IUs
             { nameof(analyse), analyse.ToString() }
         };
         await Post(UpdateMonetaryAnalyseAccountPath, qParams);
+    }
+
+    public async Task UpdateFetchExpensesFrom(DateOnly from)
+    {
+        await Post(UpdateFetchExpensesFromDatePath, new Dictionary<string, string>
+        {
+            { "fromDate", from.ToString() }
+        });
     }
 }

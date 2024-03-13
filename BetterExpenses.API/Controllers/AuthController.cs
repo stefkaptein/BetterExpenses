@@ -46,6 +46,7 @@ public class AuthController(
             return Ok(new RegisterResult { Successful = false, Errors = errors });
         }
 
+        await _userOptionsService.CreateDefaultUserSettings(newUser.Id);
         return Ok(new RegisterResult { Successful = true });
     }
 

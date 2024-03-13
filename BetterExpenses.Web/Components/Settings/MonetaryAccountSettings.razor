@@ -1,6 +1,8 @@
 ﻿@using BetterExpenses.Common.Models.User
+@using BetterExpenses.Web.Models.Toasts.Settings
 @using BetterExpenses.Web.Services.Api
 @inject IUserApiService UserApiService
+@inject ToastService ToastService
 
 <div class="row">
     <div class="col-2">
@@ -22,12 +24,12 @@
 </div>
 
 @code {
-    [Parameter]
-    public UserMonetaryAccount Account { get; set; }
+    [Parameter] public UserMonetaryAccount Account { get; set; } = null!;
 
     private async Task UpdateAnalyseAccount()
     {
         await UserApiService.UpdateAnalyseAccount(Account.Id, Account.AnalyseExpenses);
+        ToastService.Notify(UserSettingsToasts.SettingsSavedToast);
     }
 
 }

@@ -50,7 +50,7 @@ public class FetchAccountsTaskRunner(
         var fetchExpensesTask = new FetchExpensesTask
         {
             UserId = task.UserId,
-            FetchTill = DateTime.Today.Subtract(userOptions.FetchPaymentsFrom).ToUniversalTime()
+            FetchTill = DateTime.UtcNow.Date.Subtract(userOptions.FetchPaymentsTill).ToUniversalTime()
         };
 
         await _calculatorTaskService.DeleteTask<FetchAccountsTask>(task.Id);

@@ -192,8 +192,14 @@ namespace BetterExpenses.Common.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("FetchedTill")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("JointAccount")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastFetched")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -214,7 +220,7 @@ namespace BetterExpenses.Common.Migrations
                     b.Property<bool>("BunqLinked")
                         .HasColumnType("boolean");
 
-                    b.Property<TimeSpan>("FetchPaymentsFrom")
+                    b.Property<TimeSpan>("FetchPaymentsTill")
                         .HasColumnType("interval");
 
                     b.HasKey("Id");

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BetterExpenses.Common.Migrations
 {
     [DbContext(typeof(SqlDbContext))]
-    [Migration("20240305232731_AddProcessExpensesTask")]
-    partial class AddProcessExpensesTask
+    [Migration("20240313021920_MoveMongoMonetaryColumnToSql")]
+    partial class MoveMongoMonetaryColumnToSql
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -195,8 +195,14 @@ namespace BetterExpenses.Common.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("FetchedTill")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("JointAccount")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastFetched")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -217,7 +223,7 @@ namespace BetterExpenses.Common.Migrations
                     b.Property<bool>("BunqLinked")
                         .HasColumnType("boolean");
 
-                    b.Property<TimeSpan>("FetchPaymentsFrom")
+                    b.Property<TimeSpan>("FetchPaymentsTill")
                         .HasColumnType("interval");
 
                     b.HasKey("Id");

@@ -19,13 +19,14 @@ public class GraphService(IMongoConnection mongoConnection) : IGraphService
     public async Task<LineChart?> GetTotalExpensesChart(Guid userId, int year, int month)
     {
         var graphCursor = await _expenseGraphCollection.FindAsync(Builders<ExpensesGraph>.Filter.Eq(x => x.UserId, userId));
-        if (!await graphCursor.MoveNextAsync())
+        await graphCursor.MoveNextAsync();
+        
+        var graph = graphCursor.Current.FirstOrDefault();
+        if (graph == null)
         {
             return null;
         }
 
-        var graph = graphCursor.Current.First();
-        
         var dataPoints = graph.DataPoints
             .Where(x => x.Id.Year == year && x.Id.Month == month)
             .ToList();

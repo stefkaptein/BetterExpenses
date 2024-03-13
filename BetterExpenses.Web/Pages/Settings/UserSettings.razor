@@ -8,48 +8,41 @@
 @inject IAuthApiService AuthApiService
 @inject IUserApiService UserApiService
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 col-sm-12">
-            <div class="row mb-2">
-                <Loading Loaded="_userSettingsLoaded">
-                    <BunqConnectionStatus Linked="_userSettingsValue!.BunqLinked" OnButtonClick="ButtonClicked"/>
-                </Loading>
-            </div>
-            <div class="row mb-2">
-                <UserTaskButtons/>
-            </div>
+<div class="row">
+    <div class="col-md-6 col-sm-12">
+        <div class="row mb-2">
+            <Loading Loaded="_userSettingsLoaded">
+                <BunqConnectionStatus Linked="_userSettingsValue!.BunqLinked" OnButtonClick="ButtonClicked"/>
+            </Loading>
         </div>
-        <div class="col-md-6 col-sm-12">
-            <div class="row mb-2">
-                <Loading Loaded="_userMonetaryAccountsLoaded">
-                    @foreach (var account in _userMonetaryAccounts!)
-                    {
-                        <MonetaryAccountSettings Account="account"/>
-                    }
-                </Loading>
-            </div>
+        <div class="row mb-2">
+            <UserTaskButtons/>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <div class="row mb-2">
+            <Loading Loaded="UserMonetaryAccountSettingsLoaded">
+                <FetchAccountSettings UserSettingsDto="_userSettingsValue" UserMonetaryAccounts="_userMonetaryAccounts"/>
+            </Loading>
         </div>
     </div>
 </div>
 
 @code {
+    private bool UserMonetaryAccountSettingsLoaded => _userSettingsLoaded && _userMonetaryAccountsLoaded;
+    
     private bool _userSettingsLoaded;
     private UserSettingsDto? _userSettingsValue;
+
     private bool _userMonetaryAccountsLoaded;
     private List<UserMonetaryAccount>? _userMonetaryAccounts;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var settingsTask = UserApiService.GetUserSettings();
-        var accountsTask = UserApiService.GetUserAccounts();
-        
-        await Task.WhenAll(settingsTask, accountsTask);
-        
-        _userSettingsValue = await settingsTask;
+        _userSettingsValue = await UserApiService.GetUserSettings();
         _userSettingsLoaded = true;
-        _userMonetaryAccounts = await accountsTask;
+        _userMonetaryAccounts = await UserApiService.GetUserAccounts();
         _userMonetaryAccountsLoaded = true;
     }
 

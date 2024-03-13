@@ -34,13 +34,14 @@ public class FetchExpensesTaskRunner(
         }
 
         logger.LogInformation("Fetching expenses for user {UserId}", task.UserId);
-        var writeModels = new List<WriteModel<UserAccountExpensesList>>();
-        var accountIds = await _monetaryAccountService.GetAccountIdsToAnalyse(task.UserId);
-        foreach (var accountId in accountIds)
+        var writeModels = new List<WriteModel<UserExpense>>();
+        var accounts = await _monetaryAccountService.GetAccountsToAnalyse(task.UserId);
+        foreach (var account in accounts)
         {
-            writeModels.Add(await FetchExpenses(accountId, task.UserId, task.FetchTill));
+            writeModels.AddRange(await FetchExpenses(account.Id, task.UserId, task.FetchTill, account.FetchedTill));
         }
 
+        await _monetaryAccountService.UpdateFetchedTill(accounts.ToDictionary(x => x.Id, _ => task.FetchTill));
         await _expensesMongoService.BulkWrite(writeModels);
         await _calculatorTaskService.DeleteTask<FetchExpensesTask>(task.Id);
         
@@ -48,41 +49,30 @@ public class FetchExpensesTaskRunner(
         return true;
     }
 
-    private async Task<WriteModel<UserAccountExpensesList>> FetchExpenses(int accountId, Guid userId, DateTime fetchTill)
+    private async Task<List<WriteModel<UserExpense>>> FetchExpenses(int accountId, Guid userId, DateTime fetchTill, DateTime fetchedTill)
     {
-        var existing = await _expensesMongoService.FindFirst(x => x.UserId == userId && x.AccountId == accountId);
-        if (existing == null || existing.Expenses.Count == 0)
-        {
-            var list = _expensesApiService.GetExpenses(userId, accountId, fetchTill);
-            return new InsertOneModel<UserAccountExpensesList>(new UserAccountExpensesList
-            {
-                AccountId = accountId,
-                UserId = userId,
-                Expenses = list,
-                FetchedUntil = fetchTill
-            });
-        }
+        var existing = await _expensesMongoService.GetExpensesForAccount(accountId);
+        IEnumerable<UserExpense> expensesToAdd;
         
-        if (existing.FetchedUntil != fetchTill)
+        if (existing.Count == 0 || fetchedTill == DateTime.MinValue)
         {
-            var oldestId = existing.Expenses.Last().Id;
-            var list = _expensesApiService.GetExpensesFrom(userId, accountId, oldestId, fetchTill);
-            return new UpdateOneModel<UserAccountExpensesList>(
-                Builders<UserAccountExpensesList>.Filter.Eq(x => x.Id, existing.Id),
-                Builders<UserAccountExpensesList>.Update.PushEach(x => x.Expenses, list)
-            );
+            expensesToAdd = _expensesApiService.GetExpenses(userId, accountId, fetchTill);
+        } 
+        else if (fetchedTill > fetchTill)
+        {
+            var oldestId = existing.Last().Id;
+            expensesToAdd = _expensesApiService.GetExpensesFrom(userId, accountId, oldestId, fetchTill);
         }
         else
         {
-            var newestId = existing.Expenses.First().Id;
-            var list = _expensesApiService
+            var newestId = existing.First().Id;
+            expensesToAdd = _expensesApiService
                 .GetExpensesAfter(userId, accountId, newestId)
                 .OrderBy(x => x.Updated);
-            
-            return new UpdateOneModel<UserAccountExpensesList>(
-                Builders<UserAccountExpensesList>.Filter.Eq(x => x.Id, existing.Id),
-                Builders<UserAccountExpensesList>.Update.PushEach(x => x.Expenses, list, position: 0)
-            );
         }
+        
+        return expensesToAdd
+            .Select(x => new InsertOneModel<UserExpense>(x))
+            .ToList<WriteModel<UserExpense>>();
     }
 }
