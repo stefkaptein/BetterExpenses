@@ -17,7 +17,7 @@ public static class ConfigureServicesExtensions
     public static IServiceCollection ConfigureServices(this IServiceCollection services)
     {
         services.AddSingleton<IBunqAuthService, BunqAuthService>();
-        services.AddSingleton<IGraphService, GraphService>();
+        services.AddScoped<IGraphService, GraphService>();
         
         return services;
     }

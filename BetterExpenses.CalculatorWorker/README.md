@@ -1,5 +1,8 @@
 ﻿# Calculator worker
 
+## How to find fixed expenses
+
+
 ## Payment types
 
 ### BUNQ

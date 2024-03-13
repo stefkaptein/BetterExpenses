@@ -12,14 +12,16 @@ namespace BetterExpenses.Common.Database;
 
 public static class ConfigureDatabaseExtensions
 {
-    public static IServiceCollection ConfigurePostgres(this IServiceCollection services, ConfigurationManager configuration, Action<DbContextOptionsBuilder>? additionalOptions = null)
+    public static IServiceCollection ConfigurePostgres(this IServiceCollection services,
+        ConfigurationManager configuration, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped,
+        Action<DbContextOptionsBuilder>? additionalOptions = null)
     {
         services.AddDbContext<SqlDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("Postgres"));
             additionalOptions?.Invoke(options);
-        });
-        
+        }, serviceLifetime);
+
         return services;
     }
 
@@ -34,7 +36,7 @@ public static class ConfigureDatabaseExtensions
 #pragma warning restore CS0618 // Type or member is obsolete
 
         services.AddSingleton<IMongoConnection, MongoConnection>();
-        
+
         return services;
     }
 }

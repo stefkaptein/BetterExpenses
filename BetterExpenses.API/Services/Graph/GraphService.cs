@@ -1,5 +1,6 @@
 ﻿using BetterExpenses.Common.Database.Mongo;
 using BetterExpenses.Common.Models.Graphs;
+using BetterExpenses.Common.Services.Mongo.Expenses;
 using MongoDB.Driver;
 
 namespace BetterExpenses.API.Services.Graph;
@@ -9,19 +10,13 @@ public interface IGraphService
     public Task<LineChart?> GetTotalExpensesChart(Guid userId, int year, int month);
 }
 
-public class GraphService(IMongoConnection mongoConnection) : IGraphService
+public class GraphService(IExpensesGraphMongoService expensesGraphMongoService) : IGraphService
 {
-    private readonly IMongoConnection _mongoConnection = mongoConnection;
-    
-    private readonly IMongoCollection<ExpensesGraph> _expenseGraphCollection = 
-        mongoConnection.GetCollection<ExpensesGraph>(MongoConnection.ExpensesGraphsCollectionName);
+    private readonly IExpensesGraphMongoService _expensesGraphMongoService = expensesGraphMongoService;
 
     public async Task<LineChart?> GetTotalExpensesChart(Guid userId, int year, int month)
     {
-        var graphCursor = await _expenseGraphCollection.FindAsync(Builders<ExpensesGraph>.Filter.Eq(x => x.UserId, userId));
-        await graphCursor.MoveNextAsync();
-        
-        var graph = graphCursor.Current.FirstOrDefault();
+        var graph = await _expensesGraphMongoService.GetGraphForUser(userId);
         if (graph == null)
         {
             return null;

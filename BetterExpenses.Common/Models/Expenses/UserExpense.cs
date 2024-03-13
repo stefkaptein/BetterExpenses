@@ -1,12 +1,16 @@
-﻿using Bunq.Sdk.Model.Core;
+﻿using BetterExpenses.Common.Services.Mongo;
+using Bunq.Sdk.Model.Core;
 using Bunq.Sdk.Model.Generated.Endpoint;
 using Bunq.Sdk.Model.Generated.Object;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace BetterExpenses.Common.Models.Expenses;
 
+[MongoCollection(CollectionName = ExpensesCollectionName)]
 public class UserExpense
 {
+    public const string ExpensesCollectionName = "UserExpenses";
+    
     /// <summary>
     /// The id of the created Payment.
     /// </summary>

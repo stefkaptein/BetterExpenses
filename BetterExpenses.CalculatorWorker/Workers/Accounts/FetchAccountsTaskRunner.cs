@@ -9,10 +9,7 @@ using Bunq.Sdk.Model.Generated.Endpoint;
 
 namespace BetterExpenses.CalculatorWorker.Workers.Accounts;
 
-public interface IFetchAccountsTaskRunner
-{
-    public Task<bool> RunCycle();
-}
+public interface IFetchAccountsTaskRunner : ITaskRunner<FetchAccountsTask>;
 
 public class FetchAccountsTaskRunner(
     ICalculatorTaskService calculatorTaskService,
@@ -28,39 +25,24 @@ public class FetchAccountsTaskRunner(
     private readonly IUserOptionsService _userOptionsService = userOptionsService;
     private readonly IBunqPublicAttachmentApiService _bunqPublicAttachment = bunqPublicAttachmentApiService;
 
-    public async Task<bool> RunCycle()
+    public async Task<bool> RunCycle(FetchAccountsTask task)
     {
-        var task = await _calculatorTaskService.GetNextTask<FetchAccountsTask>();
-        if (task == null)
-        {
-            return false;
-        }
-
         logger.LogDebug("Fetching accounts for user {UserId}", task.UserId);
         
         var accounts = await GetAllAccounts(task);
-        await _monetaryAccountService.ReplaceMonetaryAccountsForUser(task.UserId, accounts);
+        await _monetaryAccountService.UpdateMonetaryAccountsForUser(task.UserId, task.Overwrite, accounts);
 
         var userOptions = await _userOptionsService.GetOptionsForUser(task.UserId);
         if (userOptions == null)
         {
             throw new WorkerException($"User with id {task.UserId} does not exist");
         }
-
-        var fetchExpensesTask = new FetchExpensesTask
-        {
-            UserId = task.UserId,
-            FetchTill = DateTime.UtcNow.Date.Subtract(userOptions.FetchPaymentsTill).ToUniversalTime()
-        };
-
-        await _calculatorTaskService.DeleteTask<FetchAccountsTask>(task.Id);
-        await _calculatorTaskService.AddTask(fetchExpensesTask);
         
         logger.LogDebug("Fetching accounts completed");
-        return true;
+        return accounts.Count != 0;
     }
 
-    private async Task<List<UserMonetaryAccount>> GetAllAccounts(FetchAccountsTask task)
+    private async Task<List<UserMonetaryAccount>> GetAllAccounts(CalculatorTask task)
     {
         var userId = task.UserId;
         var usableAccounts = (await _monetaryAccountApiService.ListMonetaryAccountsAsync(userId))

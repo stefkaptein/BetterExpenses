@@ -4,6 +4,7 @@ using BetterExpenses.CalculatorWorker.Workers.Expenses.Fetching;
 using BetterExpenses.CalculatorWorker.Workers.Expenses.Processing;
 using BetterExpenses.CalculatorWorker.Workers.Expenses.Processing.Graphs;
 using BetterExpenses.Common.Database;
+using BetterExpenses.Common.Extensions;
 using BetterExpenses.Common.Services;
 
 namespace BetterExpenses.CalculatorWorker;
@@ -12,9 +13,9 @@ public static class ConfigureServiceExtensions
 {
     private static IServiceCollection AddWorkerServices(this IServiceCollection services)
     {
-        services.AddScoped<IFetchAccountsTaskRunner, FetchAccountsTaskRunner>();
-        services.AddScoped<IFetchExpensesTaskRunner, FetchExpensesTaskRunner>();
-        services.AddScoped<IProcessExpensesTaskRunner, ProcessExpensesTaskRunner>();
+        services.AddTransient<IFetchAccountsTaskRunner, FetchAccountsTaskRunner>();
+        services.AddTransient<IFetchExpensesTaskRunner, FetchExpensesTaskRunner>();
+        services.AddTransient<IProcessExpensesTaskRunner, ProcessExpensesTaskRunner>();
         return services;
     }
     
@@ -28,7 +29,12 @@ public static class ConfigureServiceExtensions
 
     private static IServiceCollection AddGraphCreators(this IServiceCollection services)
     {
-        services.AddScoped<MonthlyExpensesGraphCreator>();
+        var graphGenerators = AppDomain.CurrentDomain.GetAllImplementingTypesInDomain<IGraphGenerator>();
+
+        foreach (var graphGenerator in graphGenerators)
+        {
+            services.AddTransient(graphGenerator);
+        }
         return services;
     }
     
@@ -41,9 +47,10 @@ public static class ConfigureServiceExtensions
         services.AddGraphCreators();
         services.AddHostedServices();
 
-        services.ConfigurePostgres(configuration);
+        services.ConfigurePostgres(configuration, ServiceLifetime.Transient);
         services.ConfigureMongo(configuration);
         
         return services;
     }
+    
 }

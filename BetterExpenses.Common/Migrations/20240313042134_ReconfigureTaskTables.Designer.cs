@@ -3,6 +3,7 @@ using System;
 using BetterExpenses.Common.Database.Sql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BetterExpenses.Common.Migrations
 {
     [DbContext(typeof(SqlDbContext))]
-    partial class SqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240313042134_ReconfigureTaskTables")]
+    partial class ReconfigureTaskTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,18 +34,6 @@ namespace BetterExpenses.Common.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("FinishDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ProcessDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
                     b.Property<string>("TaskType")
                         .IsRequired()
                         .HasMaxLength(21)
@@ -53,11 +44,9 @@ namespace BetterExpenses.Common.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreationDate");
+
                     b.HasIndex("Id");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("CreationDate", "Priority");
 
                     b.ToTable("CalculatorTask");
 

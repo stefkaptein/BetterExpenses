@@ -3,8 +3,8 @@ using BetterExpenses.Common.ServiceModels;
 using BetterExpenses.Common.Services.Bunq;
 using BetterExpenses.Common.Services.Context;
 using BetterExpenses.Common.Services.Crypto;
-using BetterExpenses.Common.Services.Expenses;
 using BetterExpenses.Common.Services.MonetaryAccounts;
+using BetterExpenses.Common.Services.Mongo.Expenses;
 using BetterExpenses.Common.Services.Tasks;
 using BetterExpenses.Common.Services.User;
 using Microsoft.Extensions.Configuration;
@@ -36,9 +36,11 @@ public static class ConfigureCommonServicesExtensions
 
         services.AddScoped<ICalculatorTaskService, CalculatorTaskService>();
         services.AddScoped<IMonetaryAccountService, MonetaryAccountService>();
+        services.AddScoped<IUserOptionsService, UserOptionsService>();
 
         services.AddScoped<IExpensesMongoService, ExpensesMongoService>();
-        services.AddScoped<IUserOptionsService, UserOptionsService>();
+        services.AddScoped<IFixedExpensesMongoService, FixedExpensesMongoService>();
+        services.AddScoped<IExpensesGraphMongoService, ExpensesGraphMongoService>();
 
         services.ConfigureBunqApiServices();
         

@@ -1,7 +1,9 @@
-﻿namespace BetterExpenses.CalculatorWorker.Workers.Accounts;
+﻿using BetterExpenses.Common.Models.Tasks;
+
+namespace BetterExpenses.CalculatorWorker.Workers.Accounts;
 
 public class FetchAccountsWorker(ILogger<FetchAccountsWorker> logger, IServiceScopeFactory serviceScopeFactory)
-    : Worker<FetchAccountsWorker>(serviceScopeFactory, logger)
+    : Worker<FetchAccountsWorker, FetchAccountsTask>(serviceScopeFactory, logger)
 {
     private IFetchAccountsTaskRunner _fetchAccountsTaskRunner = null!;
     
@@ -9,11 +11,12 @@ public class FetchAccountsWorker(ILogger<FetchAccountsWorker> logger, IServiceSc
     
     protected override void InitServices()
     {
+        base.InitServices();
         _fetchAccountsTaskRunner = ServiceScope.ServiceProvider.GetRequiredService<IFetchAccountsTaskRunner>();
     }
 
-    protected override async Task<bool> RunCycle()
+    protected override async Task<bool> RunCycle(FetchAccountsTask task)
     {
-        return await _fetchAccountsTaskRunner.RunCycle();
+        return await _fetchAccountsTaskRunner.RunCycle(task);
     }
 }

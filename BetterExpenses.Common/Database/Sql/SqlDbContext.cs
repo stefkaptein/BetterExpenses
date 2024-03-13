@@ -34,6 +34,22 @@ public class SqlDbContext : IdentityDbContext<BetterExpensesUser, IdentityRole<G
     {
         base.OnModelCreating(modelBuilder);
 
+        RenameDefaultTables(modelBuilder);
+        ConfigureUserSettingRelation(modelBuilder);
+        ConfigureCalculatorTaskTable(modelBuilder);
+    }
+
+    private static void ConfigureCalculatorTaskTable(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CalculatorTask>()
+            .HasDiscriminator<string>("TaskType")
+            .HasValue<FetchExpensesTask>("fetch_expenses")
+            .HasValue<FetchAccountsTask>("fetch_accounts")
+            .HasValue<ProcessExpensesTask>("process_expenses");
+    }
+
+    private static void RenameDefaultTables(ModelBuilder modelBuilder)
+    {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var tableName = entityType.GetTableName();
@@ -42,7 +58,10 @@ public class SqlDbContext : IdentityDbContext<BetterExpensesUser, IdentityRole<G
                 entityType.SetTableName(tableName[6..]);
             }
         }
-        
+    }
+
+    private static void ConfigureUserSettingRelation(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<BetterExpensesUser>()
             .HasOne(e => e.UserSettings)
             .WithOne(e => e.User)

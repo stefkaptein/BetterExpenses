@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="F23.StringSimilarity" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
         <PackageReference Include="NLog.Extensions.Hosting" Version="5.3.8" />
     </ItemGroup>

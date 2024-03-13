@@ -4,6 +4,5 @@ namespace BetterExpenses.Common.Models.Tasks;
 
 public class FetchExpensesTask : CalculatorTask
 {
-    public Guid UserId { get; set; }
     public DateTime FetchTill { get; set; } = DateTime.UtcNow.Date.Subtract(UserSettings.DefaultFetchPaymentsFrom).ToUniversalTime();
 }

@@ -1,38 +1,27 @@
 ﻿using BetterExpenses.Common.Models.Expenses;
 using BetterExpenses.Common.Models.Tasks;
 using BetterExpenses.Common.Services.Bunq;
-using BetterExpenses.Common.Services.Expenses;
 using BetterExpenses.Common.Services.MonetaryAccounts;
+using BetterExpenses.Common.Services.Mongo.Expenses;
 using BetterExpenses.Common.Services.Tasks;
 using MongoDB.Driver;
 
 namespace BetterExpenses.CalculatorWorker.Workers.Expenses.Fetching;
 
-public interface IFetchExpensesTaskRunner
-{
-    public Task<bool> RunCycle();
-}
+public interface IFetchExpensesTaskRunner : ITaskRunner<FetchExpensesTask>;
 
 public class FetchExpensesTaskRunner(
-    ICalculatorTaskService calculatorTaskService,
     IBunqExpensesService expensesApiService,
     IMonetaryAccountService monetaryAccountService,
     IExpensesMongoService expensesMongoService,
     ILogger<FetchExpensesTaskRunner> logger) : IFetchExpensesTaskRunner
 {
-    private readonly ICalculatorTaskService _calculatorTaskService = calculatorTaskService;
     private readonly IBunqExpensesService _expensesApiService = expensesApiService;
     private readonly IMonetaryAccountService _monetaryAccountService = monetaryAccountService;
     private readonly IExpensesMongoService _expensesMongoService = expensesMongoService;
 
-    public async Task<bool> RunCycle()
+    public async Task<bool> RunCycle(FetchExpensesTask task)
     {
-        var task = await _calculatorTaskService.GetNextTask<FetchExpensesTask>();
-        if (task == null)
-        {
-            return false;
-        }
-
         logger.LogInformation("Fetching expenses for user {UserId}", task.UserId);
         var writeModels = new List<WriteModel<UserExpense>>();
         var accounts = await _monetaryAccountService.GetAccountsToAnalyse(task.UserId);
@@ -43,10 +32,9 @@ public class FetchExpensesTaskRunner(
 
         await _monetaryAccountService.UpdateFetchedTill(accounts.ToDictionary(x => x.Id, _ => task.FetchTill));
         await _expensesMongoService.BulkWrite(writeModels);
-        await _calculatorTaskService.DeleteTask<FetchExpensesTask>(task.Id);
         
         logger.LogInformation("Wrote {BulkWriteCount} write models for user {UserId}", writeModels.Count, task.UserId);
-        return true;
+        return writeModels.Count != 0;
     }
 
     private async Task<List<WriteModel<UserExpense>>> FetchExpenses(int accountId, Guid userId, DateTime fetchTill, DateTime fetchedTill)

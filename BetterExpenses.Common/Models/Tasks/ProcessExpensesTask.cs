@@ -2,5 +2,4 @@
 
 public class ProcessExpensesTask : CalculatorTask
 {
-    public Guid UserId { get; set; }
 }

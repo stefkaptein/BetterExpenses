@@ -12,8 +12,9 @@ public interface IMongoConnection
 
 public class MongoConnection : IMongoConnection
 {
-    public const string ExpensesCollectionName = "UserAccountExpenses";
-    public const string ExpensesGraphsCollectionName = "UserAccountExpensesGraphs";
+    
+    
+    
     
     private readonly IMongoDatabase _database;
     

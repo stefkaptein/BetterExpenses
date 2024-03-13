@@ -6,8 +6,8 @@ namespace BetterExpenses.Common.Services.MonetaryAccounts;
 
 public interface IMonetaryAccountService
 {
-    public Task ReplaceMonetaryAccountsForUser(Guid userId, IEnumerable<UserMonetaryAccount> newList);
-    public Task<IEnumerable<int>> GetAccountIdsToAnalyse(Guid userId);
+    public Task UpdateMonetaryAccountsForUser(Guid userId, bool overwrite, IEnumerable<UserMonetaryAccount> newList);
+    public Task<List<int>> GetAccountIdsToAnalyse(Guid userId);
     public Task<List<UserMonetaryAccount>> GetAccountsToAnalyse(Guid userId);
     public Task SetAccountsToAnalyse(Guid userId, Dictionary<int, bool> accountsAnalyseStatus);
     public Task<List<UserMonetaryAccount>> GetAccounts(Guid userId);
@@ -19,21 +19,27 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
     private readonly DbSet<UserMonetaryAccount> _monetaryAccountsDbSet = dbContext.MonetaryAccounts;
 
 
-    public async Task ReplaceMonetaryAccountsForUser(Guid userId, IEnumerable<UserMonetaryAccount> newList)
+    public async Task UpdateMonetaryAccountsForUser(Guid userId, bool overwrite,
+        IEnumerable<UserMonetaryAccount> newList)
     {
         var existing = _monetaryAccountsDbSet.Where(x => x.BetterExpensesUserId == userId);
-        if (await existing.AnyAsync())
+        if (!await existing.AnyAsync())
         {
-            _monetaryAccountsDbSet.RemoveRange(existing);
+            await _monetaryAccountsDbSet.AddRangeAsync(newList);
             await dbContext.SaveChangesAsync();
         }
-        await _monetaryAccountsDbSet.AddRangeAsync(newList);
+        if (!overwrite)
+        {
+            return;
+        }
+        
+        _monetaryAccountsDbSet.RemoveRange(existing);
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<int>> GetAccountIdsToAnalyse(Guid userId)
+    public async Task<List<int>> GetAccountIdsToAnalyse(Guid userId)
     {
-        return (await GetAccountsToAnalyse(userId)).Select(x => x.Id);
+        return (await GetAccountsToAnalyse(userId)).Select(x => x.Id).ToList();
     }
 
     public async Task<List<UserMonetaryAccount>> GetAccountsToAnalyse(Guid userId)
@@ -74,7 +80,7 @@ public class MonetaryAccountService(SqlDbContext dbContext) : IMonetaryAccountSe
         {
             accountFromDb.FetchedTill = accountFetchedTillDict[accountFromDb.Id];
         }
-        
+
         await dbContext.SaveChangesAsync();
     }
 }
